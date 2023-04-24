@@ -56,7 +56,7 @@ export default function Play() {
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
   const rightCombine = ({ target }: { target: EventTarget }) => {
-    setLeftObj(objId);
+    setRightObj(objId);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
 
@@ -65,7 +65,7 @@ export default function Play() {
   }, [leftObj, rightObj])
 
   return (
-    <Container id="playCont" onMouseMove={handleMove} onClick={() => objId ? setObjId(undefined) : null}>
+    <Container id="playCont" onPointerMove={handleMove} onClick={() => objId ? setObjId(undefined) : null}>
       {
         objId && <GrapObj style={{
           left: x + "px",
@@ -82,7 +82,7 @@ export default function Play() {
           <Combine>
             <div onPointerUp={leftCombine} />
             <Plus />
-            <div onPointerUp={leftCombine} />
+            <div onPointerUp={rightCombine} />
           </Combine>
           <ObjCont>
             <ObjectBox>
