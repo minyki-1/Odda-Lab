@@ -105,177 +105,177 @@ const Container = styled.div`
   display:flex;
   flex-direction: column;
 `
-const Header = styled.header`
-  width:100vw;
-  height:48px;
-  background-color: beige;
-`
-const Main = styled.div`
-  flex:1;
-  display:flex;
-  @media screen and (max-width: 800px) {
-    flex-direction: column;
-  }
-`
-const Contents = styled.main`
-  flex:1;
-  background: linear-gradient(180deg, rgba(65, 65, 65, 0.75) 0%, rgba(65, 65, 65, 0) 37.62%), url(/image.jpg);
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: cover;
-  display:flex;
-  flex-direction: column;
-  justify-content: space-around;
-`
-const Title = styled.div`
-  width:100%;
-  display:flex;
-  justify-content: center;
-  align-items: center;
-  h1{
-    font-size: 40px;
-    font-weight: bold;
-    color:white;
-    @media screen and (max-width: 800px) {
-      font-size: 32px;
-    }
-  }
-`
-const Combine = styled.div`
-  width:100%;
-  display:flex;
-  align-items: center;
-  justify-content: center;
-  div{
-    width:140px;
-    height:140px;
-    margin: 0px 24px;
-    border-radius: 1000px;
-    background: rgba(255, 255, 255, 0.3);
-    border: 3px solid rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(3px);
-    background-position: center center;
-    background-repeat: repeat-x;
-    background-size: cover;
-    @media screen and (max-width: 800px) {
-      width:100px;
-      height:100px;
-      border: 2px solid rgba(255, 255, 255, 0.6);
-      margin: 0px 12px;
-    }
-  }
-`
-const ObjCont = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`
-const ObjectBox = styled.div`
-  background: rgba(0, 0, 0, 0.2);
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(3.5px);
-  border-radius: 12px;
-  padding-bottom: 24px;
-  @media screen and (max-width: 800px) {
-    flex-direction: column;
-    padding-bottom: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-  }
-`
-const Plus = styled(SVG_plus)`
-  width:65px;
-  height:65px; 
-  fill:white;
-  @media screen and (max-width: 800px) {
-    width:45px;
-    height:45px; 
-  }
-`
-const Ads = styled.div`
-  width:200px;
-  background-color: #d6d6d6;
-  @media screen and (max-width: 800px) {
-    flex-direction: column;
-    height:100px;
-    width:100vw;
-  }
-`
-const ObjectHead = styled.div`
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
-  padding:24px;
-  padding-top: 18px;
-  * {
-    color:white;
-  }
-  @media screen and (max-width: 800px) {
-    padding: 16px;
-    padding-top: 12px;
-    h1{
-      font-size: 15px;
-    }
-  }
-`
-const ObjectList = styled.div`
-  display:flex;
-  padding: 0px 16px;
-  @media screen and (max-width: 800px) {
-    padding: 0px 6px;
-  }
-`
-const Object = styled.div`
-  display:flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: 0px 16px;
-  div{
-    width:65px;
-    height:65px;
-    cursor: grab;
-    border-radius: 100px;
-    background-color: white;
-    background-position: center center;
-    background-repeat: repeat-x;
-    background-size: cover
-  }
-  h1{
-    margin-top: 12px;
-    font-size: 16px;
-    color:white;
-  }
-  @media screen and (max-width: 800px) {
-    div{
-      width:45px;
-      height:45px;
-    }
-    h1{
-      margin-top: 8px;
-      font-size: 14px;
-      color:white;
-    }
-  }
-`
-const DownBtn = styled(SVG_down)`
-  width:28px;
-  height:28px; 
-  fill:white;
-  @media screen and (max-width: 800px) {
-    width:20px;
-    height:20px; 
-  }
-`
-const GrapObj = styled.div<{ x: string, y: string }>`
-  width:65px;
-  height:65px;
-  cursor:grabbing;
-  position: absolute;
-  z-index: 100;
-  border-radius: 100px;
-  background-color: white;
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: cover;
-  pointer-events:none;
-`
+// const Header = styled.header`
+//   width:100vw;
+//   height:48px;
+//   background-color: beige;
+// `
+// const Main = styled.div`
+//   flex:1;
+//   display:flex;
+//   @media screen and (max-width: 800px) {
+//     flex-direction: column;
+//   }
+// `
+// const Contents = styled.main`
+//   flex:1;
+//   background: linear-gradient(180deg, rgba(65, 65, 65, 0.75) 0%, rgba(65, 65, 65, 0) 37.62%), url(/image.jpg);
+//   background-position: center center;
+//   background-repeat: repeat-x;
+//   background-size: cover;
+//   display:flex;
+//   flex-direction: column;
+//   justify-content: space-around;
+// `
+// const Title = styled.div`
+//   width:100%;
+//   display:flex;
+//   justify-content: center;
+//   align-items: center;
+//   h1{
+//     font-size: 40px;
+//     font-weight: bold;
+//     color:white;
+//     @media screen and (max-width: 800px) {
+//       font-size: 32px;
+//     }
+//   }
+// `
+// const Combine = styled.div`
+//   width:100%;
+//   display:flex;
+//   align-items: center;
+//   justify-content: center;
+//   div{
+//     width:140px;
+//     height:140px;
+//     margin: 0px 24px;
+//     border-radius: 1000px;
+//     background: rgba(255, 255, 255, 0.3);
+//     border: 3px solid rgba(255, 255, 255, 0.6);
+//     backdrop-filter: blur(3px);
+//     background-position: center center;
+//     background-repeat: repeat-x;
+//     background-size: cover;
+//     @media screen and (max-width: 800px) {
+//       width:100px;
+//       height:100px;
+//       border: 2px solid rgba(255, 255, 255, 0.6);
+//       margin: 0px 12px;
+//     }
+//   }
+// `
+// const ObjCont = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// `
+// const ObjectBox = styled.div`
+//   background: rgba(0, 0, 0, 0.2);
+//   border: 3px solid rgba(255, 255, 255, 0.2);
+//   backdrop-filter: blur(3.5px);
+//   border-radius: 12px;
+//   padding-bottom: 24px;
+//   @media screen and (max-width: 800px) {
+//     flex-direction: column;
+//     padding-bottom: 12px;
+//     border: 2px solid rgba(255, 255, 255, 0.2);
+//   }
+// `
+// const Plus = styled(SVG_plus)`
+//   width:65px;
+//   height:65px;
+//   fill:white;
+//   @media screen and (max-width: 800px) {
+//     width:45px;
+//     height:45px;
+//   }
+// `
+// const Ads = styled.div`
+//   width:200px;
+//   background-color: #d6d6d6;
+//   @media screen and (max-width: 800px) {
+//     flex-direction: column;
+//     height:100px;
+//     width:100vw;
+//   }
+// `
+// const ObjectHead = styled.div`
+//   display:flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding:24px;
+//   padding-top: 18px;
+//   * {
+//     color:white;
+//   }
+//   @media screen and (max-width: 800px) {
+//     padding: 16px;
+//     padding-top: 12px;
+//     h1{
+//       font-size: 15px;
+//     }
+//   }
+// `
+// const ObjectList = styled.div`
+//   display:flex;
+//   padding: 0px 16px;
+//   @media screen and (max-width: 800px) {
+//     padding: 0px 6px;
+//   }
+// `
+// const Object = styled.div`
+//   display:flex;
+//   flex-direction: column;
+//   align-items: center;
+//   justify-content: center;
+//   margin: 0px 16px;
+//   div{
+//     width:65px;
+//     height:65px;
+//     cursor: grab;
+//     border-radius: 100px;
+//     background-color: white;
+//     background-position: center center;
+//     background-repeat: repeat-x;
+//     background-size: cover
+//   }
+//   h1{
+//     margin-top: 12px;
+//     font-size: 16px;
+//     color:white;
+//   }
+//   @media screen and (max-width: 800px) {
+//     div{
+//       width:45px;
+//       height:45px;
+//     }
+//     h1{
+//       margin-top: 8px;
+//       font-size: 14px;
+//       color:white;
+//     }
+//   }
+// `
+// const DownBtn = styled(SVG_down)`
+//   width:28px;
+//   height:28px;
+//   fill:white;
+//   @media screen and (max-width: 800px) {
+//     width:20px;
+//     height:20px;
+//   }
+// `
+// const GrapObj = styled.div<{ x: string, y: string }>`
+//   width:65px;
+//   height:65px;
+//   cursor:grabbing;
+//   position: absolute;
+//   z-index: 100;
+//   border-radius: 100px;
+//   background-color: white;
+//   background-position: center center;
+//   background-repeat: repeat-x;
+//   background-size: cover;
+//   pointer-events:none;
+// `
