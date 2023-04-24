@@ -40,17 +40,33 @@ export default function Play() {
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
   const data = temp;
-  const [touch, setTouch] = useState<string>("byll")
+
+  const handleClick = ({ clientX, clientY, target }: { clientX: number, clientY: number, target: EventTarget }) => {
+    setObjId((target as HTMLElement).id)
+    setX(String(clientX - 65 / 2))
+    setY(String(clientY - 65 / 2))
+  }
+  const handleMove = (e: MouseEvent) => {
+    if (!objId) return;
+    setX(String(e.clientX - 65 / 2))
+    setY(String(e.clientY - 65 / 2))
+  }
+  const leftCombine = ({ target }: { target: EventTarget }) => {
+    setLeftObj(objId);
+    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+  }
+  const rightCombine = ({ target }: { target: EventTarget }) => {
+    setLeftObj(objId);
+    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+  }
 
   useEffect(() => {
 
   }, [leftObj, rightObj])
 
   return (
-    <Container id="playCont" onTouchMove={(e: any) => { console.log(e) }} onClick={() => objId ? setObjId(undefined) : null}>
-      <div style={{ width: 100, height: 100, backgroundColor: "red" }} onTouchStart={() => { setTouch("123454323456532") }}></div>
-      <h1>{touch}</h1>
-      {/* {
+    <Container id="playCont" onMouseMove={handleMove} onClick={() => objId ? setObjId(undefined) : null}>
+      {
         objId && <GrapObj style={{
           left: x + "px",
           top: y + "px",
@@ -94,7 +110,7 @@ export default function Play() {
           </ObjCont>
         </Contents>
         <Ads>Ads</Ads>
-      </Main> */}
+      </Main>
     </Container>
   )
 }
