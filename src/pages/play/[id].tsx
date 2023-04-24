@@ -35,27 +35,24 @@ const temp = {
 
 export default function Play() {
   const [objId, setObjId] = useState<string>()
-  const [x, setX] = useState("0")
-  const [y, setY] = useState("0")
+  const [locate, setLocate] = useState({ x: "0", y: "0" })
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
   const data = temp;
 
   const handlePointerDown = ({ clientX, clientY, target }: { clientX: number, clientY: number, target: EventTarget }) => {
     setObjId((target as HTMLElement).id)
-    setX(String(clientX - 65 / 2))
-    setY(String(clientY - 65 / 2))
+    setLocate({ x: String(clientX - 65 / 2), y: String(clientY - 65 / 2) })
   }
-  const handlePointerMove = (e: MouseEvent) => {
-    setX(String(e.clientX - 65 / 2))
-    setY(String(e.clientY - 65 / 2))
+  const handlePointerMove = ({ clientX, clientY }: { clientX: number, clientY: number }) => {
+    setLocate({ x: String(clientX - 65 / 2), y: String(clientY - 65 / 2) })
   }
   const leftCombine = ({ target }: { target: EventTarget }) => {
     setLeftObj(objId);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
   const rightCombine = ({ target }: { target: EventTarget }) => {
-    setLeftObj(objId);
+    setRightObj(objId);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
 
@@ -66,44 +63,31 @@ export default function Play() {
       return {
         move: {
           onTouchMove: (e: any) => {
-            console.log("1234567")
             e.preventDefault();
-            setX(String(e.changedTouches[0].pageX - 65 / 2))
-            setY(String(e.changedTouches[0].pageY - 65 / 2))
+            const x = String(e.changedTouches[0].pageX - 65 / 2)
+            const y = String(e.changedTouches[0].pageY - 65 / 2)
+            setLocate({ x, y })
           }
         },
-        left: { onTouchEnd: leftCombine },
-        right: { onTouchEnd: rightCombine },
+        left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine },
+        right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine },
         click: {
           onTouchStart: (e: any) => {
             e.preventDefault();
             setObjId((e.target as HTMLElement).id)
-            setX(String(e.touches[0].clientX - 65 / 2))
-            setY(String(e.touches[0].clientY - 65 / 2))
+            const x = String(e.changedTouches[0].pageX - 65 / 2)
+            const y = String(e.changedTouches[0].pageY - 65 / 2)
+            setLocate({ x, y })
           }
         }
       }
     } else {
-      // return {
-      //   move: {
-      //     onTouchMove: (e: any) => {
-      //       console.log("1234567")
-      //       setX(String(e.changedTouches[0].pageX - 65 / 2))
-      //       setY(String(e.changedTouches[0].pageY - 65 / 2))
-      //     }
-      //   },
-      //   left: { onTouchEnd: leftCombine },
-      //   right: { onTouchEnd: rightCombine },
-      //   click: {
-      //     onTouchStart: (e: any) => {
-      //       console.log("1234567")
-
-      //       setObjId((e.target as HTMLElement).id)
-      //       setX(String(e.touches[0].clientX - 65 / 2))
-      //       setY(String(e.touches[0].clientY - 65 / 2))
-      //     }
-      //   }
-      // }
+      return {
+        move: { onPointerMove: handlePointerMove },
+        left: { onPointerUp: leftCombine },
+        right: { onPointerUp: rightCombine },
+        click: { onPointerDown: handlePointerDown }
+      }
     }
   }
 
@@ -115,18 +99,14 @@ export default function Play() {
     <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null}>
       {
         objId && <GrapObj style={{
-          left: x + "px",
-          top: y + "px",
+          left: locate.x + "px",
+          top: locate.y + "px",
           backgroundImage: "url(" + data.objects.find(value => value.id === objId)?.img + ")"
         }} />
       }
       <Header></Header>
       <Main>
         <Contents>
-          <div>
-            <h1 style={{ color: "white" }}>{x}</h1>
-            <h1 style={{ color: "white" }}>{y}</h1>
-          </div>
           <Title>
             <h1>{data.title}</h1>
           </Title>
