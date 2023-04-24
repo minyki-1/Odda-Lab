@@ -66,7 +66,6 @@ export default function Play() {
       return {
         move: {
           onTouchMove: (e: any) => {
-            console.log(e.touches[0])
             setLeftObj(String(e.touches[0].clientX - 65 / 2))
             setRightObj(String(e.touches[0].clientY - 65 / 2))
           }
@@ -85,7 +84,6 @@ export default function Play() {
       return {
         move: {
           onTouchMove: (e: any) => {
-            console.log(e.touches[0])
             setLeftObj(String(e.touches[0].clientX - 65 / 2))
             setRightObj(String(e.touches[0].clientY - 65 / 2))
           }
@@ -119,6 +117,10 @@ export default function Play() {
       <Header></Header>
       <Main>
         <Contents>
+          <div>
+            <h1 style={{ color: "white" }}>{x}</h1>
+            <h1 style={{ color: "white" }}>{y}</h1>
+          </div>
           <Title>
             <h1>{data.title}</h1>
           </Title>
