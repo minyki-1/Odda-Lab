@@ -96,7 +96,7 @@ export default function Play() {
   }, [leftObj, rightObj])
 
   return (
-    <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null}>
+    <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null} {...makeDragDrop()?.left} >
       {
         objId && <GrapObj style={{
           left: locate.x + "px",
@@ -111,7 +111,7 @@ export default function Play() {
             <h1>{data.title}</h1>
           </Title>
           <CombineWrap>
-            <Combine {...makeDragDrop()?.left} />
+            <Combine />
             <Plus />
             <Combine {...makeDragDrop()?.right} />
           </CombineWrap>
