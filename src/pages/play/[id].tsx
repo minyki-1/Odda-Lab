@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import SVG_plus from "../../svg/plus.svg"
-import SVG_down from "../../svg/down.svg"
+// import SVG_plus from "../../svg/plus.svg"
+// import SVG_down from "../../svg/down.svg"
 import { Dispatch, EventHandler, MouseEventHandler, SetStateAction, useEffect, useState } from 'react'
 
 const temp = {
