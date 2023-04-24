@@ -80,7 +80,7 @@ export default function Play() {
             <h1>{data.title}</h1>
           </Title>
           <Combine>
-            <div onMouseUp={leftCombine} />
+            <div onPointerUp={leftCombine} />
             <Plus />
             <div onPointerUp={leftCombine} />
           </Combine>
@@ -97,8 +97,8 @@ export default function Play() {
                       <Object key={key}>
                         <div
                           id={value.id}
-                          // onPointerDown={handleClick}
-                          onMouseDown={handleClick}
+                          onPointerDown={handleClick}
+                          // onMouseDown={handleClick}
                           style={{ backgroundImage: "url(" + value.img + ")" }}
                         />
                         <h1>{value.name}</h1>
