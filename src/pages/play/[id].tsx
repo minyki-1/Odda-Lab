@@ -66,10 +66,10 @@ export default function Play() {
       return {
         move: {
           onTouchMove: (e: any) => {
+            console.log("1234567")
             e.preventDefault();
-
-            setLeftObj(String(e.changedTouches[0].pageX - 65 / 2))
-            setRightObj(String(e.changedTouches[0].pageY - 65 / 2))
+            setX(String(e.changedTouches[0].pageX - 65 / 2))
+            setY(String(e.changedTouches[0].pageY - 65 / 2))
           }
         },
         left: { onTouchEnd: leftCombine },
@@ -78,29 +78,32 @@ export default function Play() {
           onTouchStart: (e: any) => {
             e.preventDefault();
             setObjId((e.target as HTMLElement).id)
-            setLeftObj(String(e.touches[0].clientX - 65 / 2))
-            setRightObj(String(e.touches[0].clientY - 65 / 2))
+            setX(String(e.touches[0].clientX - 65 / 2))
+            setY(String(e.touches[0].clientY - 65 / 2))
           }
         }
       }
     } else {
-      return {
-        move: {
-          onTouchMove: (e: any) => {
-            setLeftObj(String(e.touches[0].clientX - 65 / 2))
-            setRightObj(String(e.touches[0].clientY - 65 / 2))
-          }
-        },
-        left: { onTouchEnd: leftCombine },
-        right: { onTouchEnd: rightCombine },
-        click: {
-          onTouchStart: (e: any) => {
-            setObjId((e.target as HTMLElement).id)
-            setLeftObj(String(e.touches[0].clientX - 65 / 2))
-            setRightObj(String(e.touches[0].clientY - 65 / 2))
-          }
-        }
-      }
+      // return {
+      //   move: {
+      //     onTouchMove: (e: any) => {
+      //       console.log("1234567")
+      //       setX(String(e.changedTouches[0].pageX - 65 / 2))
+      //       setY(String(e.changedTouches[0].pageY - 65 / 2))
+      //     }
+      //   },
+      //   left: { onTouchEnd: leftCombine },
+      //   right: { onTouchEnd: rightCombine },
+      //   click: {
+      //     onTouchStart: (e: any) => {
+      //       console.log("1234567")
+
+      //       setObjId((e.target as HTMLElement).id)
+      //       setX(String(e.touches[0].clientX - 65 / 2))
+      //       setY(String(e.touches[0].clientY - 65 / 2))
+      //     }
+      //   }
+      // }
     }
   }
 
