@@ -65,8 +65,8 @@ export default function Play() {
     if (isMobile) {
       return {
         move: {
-          onPointerMove: (e: any) => {
-            console.log(e.touches[0].clientX)
+          onTouchMove: (e: any) => {
+            console.log(e.touches[0])
             setLeftObj(String(e.touches[0].clientX - 65 / 2))
             setRightObj(String(e.touches[0].clientY - 65 / 2))
           }
@@ -83,10 +83,22 @@ export default function Play() {
       }
     } else {
       return {
-        move: { onPointerMove: handlePointerMove },
-        left: { onPointerUp: leftCombine },
-        right: { onPointerUp: rightCombine },
-        click: { onPointerDown: handlePointerDown }
+        move: {
+          onTouchMove: (e: any) => {
+            console.log(e.touches[0])
+            setLeftObj(String(e.touches[0].clientX - 65 / 2))
+            setRightObj(String(e.touches[0].clientY - 65 / 2))
+          }
+        },
+        left: { onTouchEnd: leftCombine },
+        right: { onTouchEnd: rightCombine },
+        click: {
+          onTouchStart: (e: any) => {
+            setObjId((e.target as HTMLElement).id)
+            setLeftObj(String(e.touches[0].clientX - 65 / 2))
+            setRightObj(String(e.touches[0].clientY - 65 / 2))
+          }
+        }
       }
     }
   }
