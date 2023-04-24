@@ -66,6 +66,7 @@ export default function Play() {
       return {
         move: {
           onPointerMove: (e: any) => {
+            console.log(e.touches[0].clientX)
             setLeftObj(String(e.touches[0].clientX - 65 / 2))
             setRightObj(String(e.touches[0].clientY - 65 / 2))
           }
