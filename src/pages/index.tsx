@@ -1,17 +1,5 @@
 import styled from 'styled-components'
-import SvgHeart from '../svg/heart.svg';
 
-const temp = {
-  id: "0",
-  name: "test1",
-  makerId: "0",
-  objects: [
-    {
-      name: "물",
-      // img
-    }
-  ]
-}
 
 export default function Home() {
   function typedArrayToURL(typedArray: any, mimeType: any) {
@@ -74,7 +62,6 @@ export default function Home() {
     <Container>
       <input type='file' onChange={previewImage} />
       <h1>My Next WebApp</h1>
-      <SvgHeart width="24" height="24" fill="white" />
     </Container>
   )
 }
