@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_down from "../../svg/down.svg"
-import { useState } from 'react'
+import { Dispatch, EventHandler, MouseEventHandler, SetStateAction, useEffect, useState } from 'react'
 
 const temp = {
   id: "0",
@@ -34,22 +34,45 @@ const temp = {
 
 
 export default function Play() {
-  const [grabObj, setGrabObj] = useState<HTMLElement>()
+  const [objId, setObjId] = useState<string>()
+  const [x, setX] = useState("0")
+  const [y, setY] = useState("0")
+  const [leftObj, setLeftObj] = useState<string>()
+  const [rightObj, setRightObj] = useState<string>()
   const data = temp;
 
-  const handleClick = ({ target }: { target: EventTarget }) => {
-    const obj = (target as HTMLElement).cloneNode() as HTMLElement
-    obj.style.width = "65px"
-    obj.style.height = "65px"
-    obj.style.position = "absolute"
-    setGrabObj(obj)
-    document.getElementById("playCont")?.appendChild(obj)
+  const handleClick = ({ clientX, clientY, target }: { clientX: number, clientY: number, target: EventTarget }) => {
+    setObjId((target as HTMLElement).id)
+    setX(String(clientX - 65 / 2))
+    setY(String(clientY - 65 / 2))
   }
-  const handleMove = () => {
-    grabObj?.style
+  const handleMove = (e: MouseEvent) => {
+    if (!objId) return;
+    setX(String(e.clientX - 65 / 2))
+    setY(String(e.clientY - 65 / 2))
   }
+  const leftCombine = ({ target }: { target: EventTarget }) => {
+    setLeftObj(objId);
+    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+  }
+  const rightCombine = ({ target }: { target: EventTarget }) => {
+    setLeftObj(objId);
+    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+  }
+
+  useEffect(() => {
+
+  }, [leftObj, rightObj])
+
   return (
-    <Container id="playCont" onMouseMove={() => { console.log("11") }}>
+    <Container id="playCont" onMouseMove={handleMove} onClick={() => objId ? setObjId(undefined) : null}>
+      {
+        objId && <GrapObj style={{
+          left: x + "px",
+          top: y + "px",
+          backgroundImage: "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+        }} />
+      }
       <Header></Header>
       <Main>
         <Contents>
@@ -57,9 +80,9 @@ export default function Play() {
             <h1>{data.title}</h1>
           </Title>
           <Combine>
-            <div />
+            <div onMouseUp={leftCombine} />
             <Plus />
-            <div />
+            <div onPointerUp={leftCombine} />
           </Combine>
           <ObjCont>
             <ObjectBox>
@@ -73,15 +96,10 @@ export default function Play() {
                     .map((value, key) => (
                       <Object key={key}>
                         <div
-                          onClick={handleClick}
-                          style={{
-                            backgroundImage: "url(" + value.img + ")",
-                            borderRadius: 100,
-                            backgroundColor: "white",
-                            backgroundPosition: "center center",
-                            backgroundRepeat: "repeat-x",
-                            backgroundSize: "cover"
-                          }}
+                          id={value.id}
+                          // onPointerDown={handleClick}
+                          onMouseDown={handleClick}
+                          style={{ backgroundImage: "url(" + value.img + ")" }}
                         />
                         <h1>{value.name}</h1>
                       </Object>
@@ -152,6 +170,9 @@ const Combine = styled.div`
     background: rgba(255, 255, 255, 0.3);
     border: 3px solid rgba(255, 255, 255, 0.6);
     backdrop-filter: blur(3px);
+    background-position: center center;
+    background-repeat: repeat-x;
+    background-size: cover;
     @media screen and (max-width: 800px) {
       width:100px;
       height:100px;
@@ -229,6 +250,11 @@ const Object = styled.div`
     width:65px;
     height:65px;
     cursor: grab;
+    border-radius: 100px;
+    background-color: white;
+    background-position: center center;
+    background-repeat: repeat-x;
+    background-size: cover
   }
   h1{
     margin-top: 12px;
@@ -255,4 +281,17 @@ const DownBtn = styled(SVG_down)`
     width:20px;
     height:20px; 
   }
+`
+const GrapObj = styled.div<{ x: string, y: string }>`
+  width:65px;
+  height:65px;
+  cursor:grabbing;
+  position: absolute;
+  z-index: 100;
+  border-radius: 100px;
+  background-color: white;
+  background-position: center center;
+  background-repeat: repeat-x;
+  background-size: cover;
+  pointer-events:none;
 `
