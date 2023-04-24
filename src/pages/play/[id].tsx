@@ -66,14 +66,17 @@ export default function Play() {
       return {
         move: {
           onTouchMove: (e: any) => {
-            setLeftObj(String(e.touches[0].clientX - 65 / 2))
-            setRightObj(String(e.touches[0].clientY - 65 / 2))
+            e.preventDefault();
+
+            setLeftObj(String(e.changedTouches[0].pageX - 65 / 2))
+            setRightObj(String(e.changedTouches[0].pageY - 65 / 2))
           }
         },
         left: { onTouchEnd: leftCombine },
         right: { onTouchEnd: rightCombine },
         click: {
           onTouchStart: (e: any) => {
+            e.preventDefault();
             setObjId((e.target as HTMLElement).id)
             setLeftObj(String(e.touches[0].clientX - 65 / 2))
             setRightObj(String(e.touches[0].clientY - 65 / 2))
