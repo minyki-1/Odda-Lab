@@ -72,6 +72,7 @@ export default function Play() {
         left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine },
         right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine },
         click: {
+          onTouchEnd: leftCombine,
           onTouchStart: (e: any) => {
             e.preventDefault();
             setObjId((e.target as HTMLElement).id)
