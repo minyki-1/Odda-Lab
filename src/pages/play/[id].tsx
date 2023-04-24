@@ -184,11 +184,11 @@ const Container = styled.div`
 // `
 // const Plus = styled(SVG_plus)`
 //   width:65px;
-//   height:65px;
+//   height:65px; 
 //   fill:white;
 //   @media screen and (max-width: 800px) {
 //     width:45px;
-//     height:45px;
+//     height:45px; 
 //   }
 // `
 // const Ads = styled.div`
@@ -259,11 +259,11 @@ const Container = styled.div`
 // `
 // const DownBtn = styled(SVG_down)`
 //   width:28px;
-//   height:28px;
+//   height:28px; 
 //   fill:white;
 //   @media screen and (max-width: 800px) {
 //     width:20px;
-//     height:20px;
+//     height:20px; 
 //   }
 // `
 // const GrapObj = styled.div<{ x: string, y: string }>`
