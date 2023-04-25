@@ -49,13 +49,13 @@ export default function Play() {
   }
   const leftCombine = ({ target }: { target: EventTarget }) => {
     setLeftObj(objId);
-    setObjId(undefined);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+    setObjId(undefined);
   }
   const rightCombine = ({ target }: { target: EventTarget }) => {
     setRightObj(objId);
-    setObjId(undefined);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
+    setObjId(undefined);
   }
 
   const makeDragDrop = () => {
@@ -106,7 +106,7 @@ export default function Play() {
           backgroundImage: "url(" + data.objects.find(value => value.id === objId)?.img + ")"
         }} />
       }
-      <Header></Header>
+      <Header>{data.objects.find(value => value.id === objId)?.name}</Header>
       <Main>
         <Contents>
           <Title>
