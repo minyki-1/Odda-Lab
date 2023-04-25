@@ -38,6 +38,7 @@ export default function Play() {
   const [locate, setLocate] = useState({ x: "0", y: "0" })
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
+  const [touchEnd, setTouchEnd] = useState(true)
   const data = temp;
 
   const handlePointerDown = ({ clientX, clientY, target }: { clientX: number, clientY: number, target: EventTarget }) => {
@@ -110,6 +111,7 @@ export default function Play() {
           <Title>
             <h1>Left:{leftObj}</h1>
             <h1>Right:{rightObj}</h1>
+            <h1>TouchEnd:{String(touchEnd)}</h1>
           </Title>
           <CombineWrap>
             <Combine
@@ -136,6 +138,7 @@ export default function Play() {
                         <ObjectImg
                           id={value.id}
                           {...makeDragDrop()?.click}
+                          onTouchEnd={() => { setTouchEnd(false) }}
                           style={{ backgroundImage: "url(" + value.img + ")" }}
                         />
                         <h1>{value.name}</h1>
