@@ -48,4 +48,16 @@ export const GlobalStyle = createGlobalStyle`
   button {
     background-color: initial;
   }
+  .object{
+    width:65px;
+    height:65px;
+    cursor:grabbing;
+    position: absolute;
+    z-index: 100;
+    border-radius: 100px;
+    background-color: white;
+    background-position: center center;
+    background-repeat: repeat-x;
+    background-size: cover;
+  }
 `;
