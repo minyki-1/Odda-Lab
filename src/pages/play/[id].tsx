@@ -35,18 +35,18 @@ const temp = {
 
 export default function Play() {
   const [objId, setObjId] = useState<string>()
-  const [locate, setLocate] = useState({ x: "0", y: "0" })
+  const [locate, setLocate] = useState({ x: 0, y: 0 })
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
-  const [touchEnd, setTouchEnd] = useState(true)
+  // const [onCombine, setOnCombine] = useState()
   const data = temp;
 
   const handlePointerDown = ({ clientX, clientY, target }: { clientX: number, clientY: number, target: EventTarget }) => {
     setObjId((target as HTMLElement).id)
-    setLocate({ x: String(clientX - 65 / 2), y: String(clientY - 65 / 2) })
+    setLocate({ x: clientX - 65 / 2, y: clientY - 65 / 2 })
   }
   const handlePointerMove = ({ clientX, clientY }: { clientX: number, clientY: number }) => {
-    setLocate({ x: String(clientX - 65 / 2), y: String(clientY - 65 / 2) })
+    setLocate({ x: clientX - 65 / 2, y: clientY - 65 / 2 })
   }
   const leftCombine = () => {
     setLeftObj(objId);
@@ -65,8 +65,8 @@ export default function Play() {
         move: {
           onTouchMove: (e: any) => {
             e.preventDefault();
-            const x = String(e.changedTouches[0].pageX - 65 / 2)
-            const y = String(e.changedTouches[0].pageY - 65 / 2)
+            const x = e.changedTouches[0].pageX - 65 / 2
+            const y = e.changedTouches[0].pageY - 65 / 2
             setLocate({ x, y })
           }
         },
@@ -76,8 +76,8 @@ export default function Play() {
           onTouchStart: (e: any) => {
             e.preventDefault();
             setObjId((e.target as HTMLElement).id)
-            const x = String(e.changedTouches[0].pageX - 65 / 2)
-            const y = String(e.changedTouches[0].pageY - 65 / 2)
+            const x = e.changedTouches[0].pageX - 65 / 2
+            const y = e.changedTouches[0].pageY - 65 / 2
             setLocate({ x, y })
           }
         }
@@ -111,15 +111,17 @@ export default function Play() {
           <Title>
             <h1>Left:{leftObj}</h1>
             <h1>Right:{rightObj}</h1>
-            <h1>TouchEnd:{String(touchEnd)}</h1>
+            {/* <h1>TouchEnd:{String(touchEnd)}</h1> */}
           </Title>
           <CombineWrap>
             <Combine
+              id="leftCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
               {...makeDragDrop()?.left}
             />
             <Plus />
             <Combine
+              id="rightCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
               {...makeDragDrop()?.right}
             />
@@ -138,7 +140,20 @@ export default function Play() {
                         <ObjectImg
                           id={value.id}
                           {...makeDragDrop()?.click}
-                          onTouchEnd={() => { setTouchEnd(false) }}
+                          onTouchEnd={(e: any) => {
+                            const x = e.changedTouches[0].pageX - 65 / 2
+                            const y = e.changedTouches[0].pageY - 65 / 2
+                            const leftCombine = document.getElementById("leftCombine")
+                            const rightCombine = document.getElementById("rightCombine")
+                            if (!leftCombine || !rightCombine) return
+                            if (leftCombine.clientLeft < x && leftCombine.clientLeft + 140 > x && leftCombine.clientTop < y && leftCombine.clientTop + 140 > y) {
+                              setLeftObj(objId);
+                              setObjId(undefined);
+                            } else if (rightCombine.clientLeft < x && rightCombine.clientLeft + 140 > x && rightCombine.clientTop < y && rightCombine.clientTop + 140 > y) {
+                              setRightObj(objId);
+                              setObjId(undefined);
+                            }
+                          }}
                           style={{ backgroundImage: "url(" + value.img + ")" }}
                         />
                         <h1>{value.name}</h1>
