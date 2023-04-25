@@ -101,11 +101,11 @@ export default function Play() {
     newObj.style.top = clientY - 65 / 2 + "px"
     newObj.style.backgroundImage = target.style.backgroundImage
     document.body.appendChild(newObj)
-    const handlePointerMove = (e: TouchEvent) => {
+    const handleTouchMove = (e: TouchEvent) => {
       newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
       newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
     }
-    const handlePointerUp = (e: TouchEvent) => {
+    const handleTouchEnd = (e: TouchEvent) => {
       const target = e.target as HTMLElement
       const x = e.changedTouches[0].pageX
       const y = e.changedTouches[0].pageY
@@ -122,18 +122,37 @@ export default function Play() {
       } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
         target.remove()
       }
-      document.getElementById("playCont")?.removeEventListener("touchmove", handlePointerMove);
-      target.removeEventListener("touchmove", handlePointerMove);
+      document.getElementById("playCont")?.removeEventListener("touchmove", handleTouchMove);
+      target.removeEventListener("touchmove", handleTouchMove);
     }
     newObj.addEventListener("touchstart", (e) => {
       newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
       newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
-      newObj.addEventListener("touchmove", handlePointerMove)
-      document.getElementById("playCont")?.addEventListener("touchmove", handlePointerMove)
+      newObj.addEventListener("touchmove", handleTouchMove)
+      document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
     })
-    newObj.addEventListener("touchend", handlePointerUp)
-    newObj.addEventListener("touchmove", handlePointerMove)
-    document.getElementById("playCont")?.addEventListener("touchmove", handlePointerMove)
+    newObj.addEventListener("touchend", handleTouchEnd)
+    newObj.addEventListener("touchmove", handleTouchMove)
+    document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
+  }
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    const target = e.target as HTMLElement
+    const x = e.changedTouches[0].pageX
+    const y = e.changedTouches[0].pageY
+    const leftCombine = document.getElementById("leftCombine")
+    const rightCombine = document.getElementById("rightCombine")
+    const objectList = document.getElementById("objectList")
+    if (!leftCombine || !rightCombine || !objectList) return
+    if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+      setLeftObj(target.classList[0]);
+      target.remove()
+    } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+      setRightObj(target.classList[0]);
+      target.remove()
+    } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+      target.remove()
+    }
   }
 
   return (
@@ -155,6 +174,7 @@ export default function Play() {
                         id={value.id}
                         onPointerDown={handlePointerDown}
                         onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
                         style={{ backgroundImage: `url("${value.img}")` }}
                       />
                       <h1>{value.name}</h1>
