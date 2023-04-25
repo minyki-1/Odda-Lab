@@ -92,8 +92,8 @@ export default function Play() {
   const handleTouchStart = (e: TouchEvent) => {
     e.preventDefault();
     const target = e.target as HTMLElement
-    const clientX = e.touches[0].clientX
-    const clientY = e.touches[0].clientY
+    const clientX = e.changedTouches[0].pageX
+    const clientY = e.changedTouches[0].pageY
     const newObj = document.createElement("div")
     newObj.id = getCompUID(16, document)
     newObj.className = target.id + " " + "object"
@@ -102,13 +102,13 @@ export default function Play() {
     newObj.style.backgroundImage = target.style.backgroundImage
     document.body.appendChild(newObj)
     const handlePointerMove = (e: TouchEvent) => {
-      newObj.style.left = e.touches[0].clientX - 65 / 2 + "px"
-      newObj.style.top = e.touches[0].clientY - 65 / 2 + "px"
+      newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
+      newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
     }
     const handlePointerUp = (e: TouchEvent) => {
       const target = e.target as HTMLElement
-      const x = e.touches[0].clientX
-      const y = e.touches[0].clientY
+      const x = e.changedTouches[0].pageX
+      const y = e.changedTouches[0].pageY
       const leftCombine = document.getElementById("leftCombine")
       const rightCombine = document.getElementById("rightCombine")
       const objectList = document.getElementById("objectList")
@@ -126,8 +126,8 @@ export default function Play() {
       target.removeEventListener("touchmove", handlePointerMove);
     }
     newObj.addEventListener("touchstart", (e) => {
-      newObj.style.left = e.touches[0].clientX - 65 / 2 + "px"
-      newObj.style.top = e.touches[0].clientY - 65 / 2 + "px"
+      newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
+      newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
       newObj.addEventListener("touchmove", handlePointerMove)
       document.getElementById("playCont")?.addEventListener("touchmove", handlePointerMove)
     })
