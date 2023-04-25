@@ -49,10 +49,12 @@ export default function Play() {
   }
   const leftCombine = ({ target }: { target: EventTarget }) => {
     setLeftObj(objId);
+    setObjId(undefined);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
   const rightCombine = ({ target }: { target: EventTarget }) => {
     setRightObj(objId);
+    setObjId(undefined);
     (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
   }
 
@@ -72,7 +74,6 @@ export default function Play() {
         left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine },
         right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine },
         click: {
-          onTouchEnd: leftCombine,
           onTouchStart: (e: any) => {
             e.preventDefault();
             setObjId((e.target as HTMLElement).id)
@@ -112,7 +113,7 @@ export default function Play() {
             <h1>{data.title}</h1>
           </Title>
           <CombineWrap>
-            <Combine />
+            <Combine {...makeDragDrop()?.left} />
             <Plus />
             <Combine {...makeDragDrop()?.right} />
           </CombineWrap>
