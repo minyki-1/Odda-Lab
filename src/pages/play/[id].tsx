@@ -69,8 +69,8 @@ export default function Play() {
             setLocate({ x, y })
           }
         },
-        left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine },
-        right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine },
+        left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine, onPointerUp: leftCombine },
+        right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine, onPointerUp: rightCombine },
         click: {
           onTouchStart: (e: any) => {
             e.preventDefault();
