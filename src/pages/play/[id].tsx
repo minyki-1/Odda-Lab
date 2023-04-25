@@ -48,47 +48,39 @@ export default function Play() {
   const handlePointerMove = ({ clientX, clientY }: { clientX: number, clientY: number }) => {
     setLocate({ x: clientX - 65 / 2, y: clientY - 65 / 2 })
   }
-  const leftCombine = () => {
+  const handlePointerUpLeft = () => {
     setLeftObj(objId);
     setObjId(undefined);
   }
-  const rightCombine = () => {
+  const handlePointerUpRight = () => {
     setRightObj(objId);
     setObjId(undefined);
   }
-
-  const makeDragDrop = () => {
-    if (typeof navigator !== "object") return
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      return {
-        move: {
-          onTouchMove: (e: any) => {
-            e.preventDefault();
-            const x = e.changedTouches[0].pageX - 65 / 2
-            const y = e.changedTouches[0].pageY - 65 / 2
-            setLocate({ x, y })
-          }
-        },
-        left: { onTouchEnd: leftCombine, onTouchCancel: leftCombine, onPointerUp: leftCombine },
-        right: { onTouchEnd: rightCombine, onTouchCancel: rightCombine, onPointerUp: rightCombine },
-        click: {
-          onTouchStart: (e: any) => {
-            e.preventDefault();
-            setObjId((e.target as HTMLElement).id)
-            const x = e.changedTouches[0].pageX - 65 / 2
-            const y = e.changedTouches[0].pageY - 65 / 2
-            setLocate({ x, y })
-          }
-        }
-      }
-    } else {
-      return {
-        move: { onPointerMove: handlePointerMove },
-        left: { onPointerUp: leftCombine },
-        right: { onPointerUp: rightCombine },
-        click: { onPointerDown: handlePointerDown }
-      }
+  const handleTouchStart = (e: any) => {
+    e.preventDefault();
+    setObjId((e.target as HTMLElement).id)
+    const x = e.changedTouches[0].pageX - 65 / 2
+    const y = e.changedTouches[0].pageY - 65 / 2
+    setLocate({ x, y })
+  }
+  const handleTouchMove = (e: any) => {
+    e.preventDefault();
+    const x = e.changedTouches[0].pageX - 65 / 2
+    const y = e.changedTouches[0].pageY - 65 / 2
+    setLocate({ x, y })
+  }
+  const handleTouchEnd = (e: any) => {
+    const x = e.changedTouches[0].pageX - 65 / 2
+    const y = e.changedTouches[0].pageY - 65 / 2
+    const leftCombine = document.getElementById("leftCombine")
+    const rightCombine = document.getElementById("rightCombine")
+    if (!leftCombine || !rightCombine) return
+    if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + 140 > x && leftCombine.offsetTop < y && leftCombine.offsetTop + 140 > y) {
+      setLeftObj(objId);
+      setObjId(undefined);
+    } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + 140 > x && rightCombine.offsetTop < y && rightCombine.offsetTop + 140 > y) {
+      setRightObj(objId);
+      setObjId(undefined);
     }
   }
 
@@ -97,7 +89,12 @@ export default function Play() {
   }, [leftObj, rightObj])
 
   return (
-    <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null} >
+    <Container
+      id="playCont"
+      onPointerMove={handlePointerMove}
+      onTouchMove={handleTouchMove}
+      onClick={() => objId ? setObjId(undefined) : null}
+    >
       {
         objId && <GrapObj style={{
           left: locate.x + "px",
@@ -109,21 +106,19 @@ export default function Play() {
       <Main>
         <Contents>
           <Title>
-            <h1>Left:{leftObj}</h1>
-            <h1>Right:{rightObj}</h1>
-            {/* <h1>TouchEnd:{String(touchEnd)}</h1> */}
+            <h1>{data.title}</h1>
           </Title>
           <CombineWrap>
             <Combine
               id="leftCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
-              // {...makeDragDrop()?.left}
+              onPointerUp={handlePointerUpLeft}
             />
             <Plus />
             <Combine
               id="rightCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
-              // {...makeDragDrop()?.right}
+              onPointerUp={handlePointerUpRight}
             />
           </CombineWrap>
           <ObjCont>
@@ -139,21 +134,9 @@ export default function Play() {
                       <Object key={key}>
                         <ObjectImg
                           id={value.id}
-                          {...makeDragDrop()?.click}
-                          onTouchEnd={(e: any) => {
-                            const x = e.changedTouches[0].pageX - 65 / 2
-                            const y = e.changedTouches[0].pageY - 65 / 2
-                            const leftCombine = document.getElementById("leftCombine")
-                            const rightCombine = document.getElementById("rightCombine")
-                            if (!leftCombine || !rightCombine) return
-                            if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + 140 > x && leftCombine.offsetTop < y && leftCombine.offsetTop + 140 > y) {
-                              setLeftObj(objId);
-                              setObjId(undefined);
-                            } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + 140 > x && rightCombine.offsetTop < y && rightCombine.offsetTop + 140 > y) {
-                              setRightObj(objId);
-                              setObjId(undefined);
-                            }
-                          }}
+                          onPointerDown={handlePointerDown}
+                          onTouchStart={handleTouchStart}
+                          onTouchEnd={handleTouchEnd}
                           style={{ backgroundImage: "url(" + value.img + ")" }}
                         />
                         <h1>{value.name}</h1>
