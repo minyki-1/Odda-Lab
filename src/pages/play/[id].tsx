@@ -47,14 +47,12 @@ export default function Play() {
   const handlePointerMove = ({ clientX, clientY }: { clientX: number, clientY: number }) => {
     setLocate({ x: String(clientX - 65 / 2), y: String(clientY - 65 / 2) })
   }
-  const leftCombine = ({ target }: { target: EventTarget }) => {
+  const leftCombine = () => {
     setLeftObj(objId);
-    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
     setObjId(undefined);
   }
-  const rightCombine = ({ target }: { target: EventTarget }) => {
+  const rightCombine = () => {
     setRightObj(objId);
-    (target as HTMLElement).style.backgroundImage = "url(" + data.objects.find(value => value.id === objId)?.img + ")"
     setObjId(undefined);
   }
 
@@ -98,7 +96,7 @@ export default function Play() {
   }, [leftObj, rightObj])
 
   return (
-    <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null} {...makeDragDrop()?.left} >
+    <Container id="playCont" {...makeDragDrop()?.move} onClick={() => objId ? setObjId(undefined) : null} >
       {
         objId && <GrapObj style={{
           left: locate.x + "px",
@@ -110,12 +108,19 @@ export default function Play() {
       <Main>
         <Contents>
           <Title>
-            <h1>{data.title}</h1>
+            <h1>Left:{leftObj}</h1>
+            <h1>Right:{rightObj}</h1>
           </Title>
           <CombineWrap>
-            <Combine {...makeDragDrop()?.left} />
+            <Combine
+              style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
+              {...makeDragDrop()?.left}
+            />
             <Plus />
-            <Combine {...makeDragDrop()?.right} />
+            <Combine
+              style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
+              {...makeDragDrop()?.right}
+            />
           </CombineWrap>
           <ObjCont>
             <ObjectBackground>
