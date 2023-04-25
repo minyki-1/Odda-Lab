@@ -117,13 +117,13 @@ export default function Play() {
             <Combine
               id="leftCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
-              {...makeDragDrop()?.left}
+              // {...makeDragDrop()?.left}
             />
             <Plus />
             <Combine
               id="rightCombine"
               style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
-              {...makeDragDrop()?.right}
+              // {...makeDragDrop()?.right}
             />
           </CombineWrap>
           <ObjCont>
@@ -146,10 +146,10 @@ export default function Play() {
                             const leftCombine = document.getElementById("leftCombine")
                             const rightCombine = document.getElementById("rightCombine")
                             if (!leftCombine || !rightCombine) return
-                            if (leftCombine.clientLeft < x && leftCombine.clientLeft + 140 > x && leftCombine.clientTop < y && leftCombine.clientTop + 140 > y) {
+                            if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + 140 > x && leftCombine.offsetTop < y && leftCombine.offsetTop + 140 > y) {
                               setLeftObj(objId);
                               setObjId(undefined);
-                            } else if (rightCombine.clientLeft < x && rightCombine.clientLeft + 140 > x && rightCombine.clientTop < y && rightCombine.clientTop + 140 > y) {
+                            } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + 140 > x && rightCombine.offsetTop < y && rightCombine.offsetTop + 140 > y) {
                               setRightObj(objId);
                               setObjId(undefined);
                             }
