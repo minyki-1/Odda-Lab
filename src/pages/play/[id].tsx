@@ -42,6 +42,7 @@ const temp = {
 export default function Play() {
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
+  const [selectObj, setSelectObj] = useState<string>()
   const data = temp;
 
   const handlePointerDown = (e: PointerEvent) => {
@@ -54,6 +55,7 @@ export default function Play() {
     newObj.style.top = clientY - 65 / 2 + "px"
     newObj.style.backgroundImage = target.style.backgroundImage
     document.body.appendChild(newObj)
+    setSelectObj(newObj.id)
     const handlePointerMove = (e: PointerEvent) => {
       newObj.style.left = e.clientX - 65 / 2 + "px"
       newObj.style.top = e.clientY - 65 / 2 + "px"
@@ -81,6 +83,7 @@ export default function Play() {
     newObj.addEventListener("pointerdown", (e) => {
       newObj.style.left = e.clientX - 65 / 2 + "px"
       newObj.style.top = e.clientY - 65 / 2 + "px"
+      setSelectObj(newObj.id)
       newObj.addEventListener("pointermove", handlePointerMove)
       document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
     })
@@ -137,7 +140,8 @@ export default function Play() {
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
-    const target = e.target as HTMLElement
+    const target = selectObj ? document.getElementById(selectObj) : null
+    if (!target) return
     const x = e.changedTouches[0].pageX
     const y = e.changedTouches[0].pageY
     const leftCombine = document.getElementById("leftCombine")
