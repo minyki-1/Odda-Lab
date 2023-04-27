@@ -4,7 +4,6 @@ import SVG_down from "../../svg/down.svg"
 import { useState } from 'react'
 import { getCompUID } from '../../lib/randomString'
 import ReactDOM from "react-dom/client"
-import Draggable from 'react-draggable';
 
 const temp = {
   id: "0",
@@ -45,6 +44,7 @@ export default function Play() {
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
   const [selectObj, setSelectObj] = useState<string>()
+  const [list, setList] = useState<string[]>([])
   const data = temp;
 
   const handlePointerDown = (e: PointerEvent) => {
@@ -58,13 +58,6 @@ export default function Play() {
     newObj.style.top = clientY - 65 / 2 + "px"
     newObj.style.backgroundImage = target.style.backgroundImage
     document.body.appendChild(newObj)
-    const root = ReactDOM.createRoot(newObj);
-    root.render(
-      <Draggable
-        handle={`.${uid}`}
-        defaultPosition={{ x: clientX - 65 / 2, y: clientY - 65 / 2 }}
-      />
-    );
     setSelectObj(newObj.id)
     const handlePointerMove = (e: PointerEvent) => {
       newObj.style.left = e.clientX - 65 / 2 + "px"
@@ -100,34 +93,31 @@ export default function Play() {
       document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
     })
     newObj.addEventListener("pointerup", handlePointerUp)
-    newObj.addEventListener("dragenter", (e) => {
-      console.log(e)
-    })
     newObj.addEventListener("pointermove", handlePointerMove)
     document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
   }
 
   const handleTouchStart = (e: TouchEvent) => {
-    e.preventDefault();
     const target = e.target as HTMLElement
-    const clientX = e.changedTouches[0].pageX
-    const clientY = e.changedTouches[0].pageY
+    const clientX = e.changedTouches[0].clientX
+    const clientY = e.changedTouches[0].clientY
     const newObj = document.createElement("div")
-    newObj.id = getCompUID(16, document)
+    const uid = getCompUID(16, document)
+    setList([uid, ...list])
+    newObj.id = uid
     newObj.className = target.id + " " + "object"
     newObj.style.left = clientX - 65 / 2 + "px"
     newObj.style.top = clientY - 65 / 2 + "px"
     newObj.style.backgroundImage = target.style.backgroundImage
+    setSelectObj(newObj.id)
     document.body.appendChild(newObj)
     const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
-      newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
+      newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+      newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
     }
     const handleTouchEnd = (e: TouchEvent) => {
-      e.preventDefault();
-      const x = e.changedTouches[0].pageX
-      const y = e.changedTouches[0].pageY
+      const x = e.changedTouches[0].clientX
+      const y = e.changedTouches[0].clientY
       const leftCombine = document.getElementById("leftCombine")
       const rightCombine = document.getElementById("rightCombine")
       const objectList = document.getElementById("objectList")
@@ -145,9 +135,9 @@ export default function Play() {
       target.removeEventListener("touchmove", handleTouchMove);
     }
     newObj.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      newObj.style.left = e.changedTouches[0].pageX - 65 / 2 + "px"
-      newObj.style.top = e.changedTouches[0].pageY - 65 / 2 + "px"
+      newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+      newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+      setSelectObj(newObj.id)
       newObj.addEventListener("touchmove", handleTouchMove)
       document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
     })
@@ -157,11 +147,14 @@ export default function Play() {
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
-    e.preventDefault();
-    const target = selectObj ? document.getElementById(selectObj) : null
-    if (!target) return
-    const x = e.changedTouches[0].pageX
-    const y = e.changedTouches[0].pageY
+    const target = selectObj ? document.getElementById(selectObj) : null;
+    if (!target) return;
+    const handleTouchMove = (e: TouchEvent) => {
+      target.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+      target.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+    }
+    const x = e.changedTouches[0].clientX
+    const y = e.changedTouches[0].clientY
     const leftCombine = document.getElementById("leftCombine")
     const rightCombine = document.getElementById("rightCombine")
     const objectList = document.getElementById("objectList")
@@ -175,11 +168,19 @@ export default function Play() {
     } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
       target.remove()
     }
+    document.getElementById("playCont")?.removeEventListener("touchmove", handleTouchMove);
+    target.removeEventListener("touchmove", handleTouchMove);
   }
 
   return (
     <Container id="playCont">
-      <Header></Header>
+      <Header>
+        {
+          list.map((item, key) => (
+            <h3 key={key}>{item}</h3>
+          ))
+        }
+      </Header>
       <Main>
         <Contents>
           <ObjectBackground id="objectList">
@@ -196,6 +197,7 @@ export default function Play() {
                         id={value.id}
                         onPointerDown={handlePointerDown}
                         onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
                         style={{ backgroundImage: `url("${value.img}")` }}
                       />
                       <h1>{value.name}</h1>
@@ -260,10 +262,7 @@ export default function Play() {
                   document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
                   setLeftObj(undefined)
                 }}
-                onTouchStart={(e: TouchEvent) => {
-                  handleTouchStart(e)
-                  setLeftObj(undefined)
-                }}
+                onTouchStart={handleTouchStart}
               />
               <Plus />
               <Combine
@@ -317,10 +316,7 @@ export default function Play() {
                   document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
                   setRightObj(undefined)
                 }}
-                onTouchStart={(e: TouchEvent) => {
-                  setRightObj(undefined)
-                  handleTouchStart(e)
-                }}
+                onTouchStart={handleTouchStart}
               />
             </CombineWrap>
             <div style={{ height: "15%" }}></div>
