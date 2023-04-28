@@ -56,6 +56,9 @@ export default function Play() {
         obj = rightObj;
         setRightObj(undefined)
       }
+      const moveEventName = "clientX" in e ? "pointermove" : "touchmove"
+      const startEventName = "clientX" in e ? "pointerdown" : "touchstart"
+      const endEventName = "clientX" in e ? "pointerup" : "touchend"
       const { x, y } = getLocate(e)
       const newObj = document.createElement("div")
       const uid = getCompUID(16, document)
@@ -66,12 +69,12 @@ export default function Play() {
       newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === obj)?.img})`
       document.body.appendChild(newObj)
       setSelectObj(newObj)
-      const handleTouchMove = (e: TDndEvent) => {
+      const handleMove = (e: TDndEvent) => {
         const { x, y } = getLocate(e)
         newObj.style.left = x - 65 / 2 + "px"
         newObj.style.top = y - 65 / 2 + "px"
       }
-      const handleTouchEnd = (e: TDndEvent) => {
+      const handleEnd = (e: TDndEvent) => {
         setSelectObj(undefined)
         const target = e.target as HTMLElement
         const { x, y } = getLocate(e)
@@ -95,23 +98,24 @@ export default function Play() {
           target.remove()
         }
         newObj.style.cursor = "grab"
-        target.removeEventListener("touchmove", handleTouchMove);
+        target.removeEventListener(moveEventName, handleMove);
       }
-      newObj.addEventListener("touchstart", (e) => {
+      newObj.addEventListener(startEventName, (e) => {
         newObj.style.cursor = "grabbing"
-        newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
-        newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+        const { x, y } = getLocate(e)
+        newObj.style.left = x - 65 / 2 + "px"
+        newObj.style.top = y - 65 / 2 + "px"
         setSelectObj(newObj)
-        newObj.addEventListener("touchmove", handleTouchMove)
+        newObj.addEventListener(moveEventName, handleMove)
       })
-      newObj.addEventListener("touchend", handleTouchEnd)
-      newObj.addEventListener("touchmove", handleTouchMove)
+      newObj.addEventListener(endEventName, handleEnd)
+      newObj.addEventListener(moveEventName, handleMove)
     }
   }
 
   const getLocate = (e: TDndEvent) => {
-    if (e instanceof PointerEvent) return { x: e.clientX, y: e.clientY }
-    else return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
+    if ("clientX" in e) return { x: e.clientX, y: e.clientY }
+    return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
   }
 
   const handleTouchEnd = (e: TouchEvent) => {
@@ -160,10 +164,10 @@ export default function Play() {
   const handleMove = (e: TDndEvent) => {
     if (typeof navigator !== "object" || !selectObj) return;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const checkMobileEvent = isMobile && e instanceof TouchEvent
-    const checkPCEvent = !isMobile && e instanceof PointerEvent
-    if (!checkMobileEvent || !checkPCEvent) return;
     const { x, y } = getLocate(e)
+    const checkMobileEvent = isMobile && "changedTouches" in e
+    const checkPCEvent = !isMobile && "clientX" in e
+    if (!checkMobileEvent && !checkPCEvent) return;
     selectObj.style.left = x - 65 / 2 + "px"
     selectObj.style.top = y - 65 / 2 + "px"
   }
