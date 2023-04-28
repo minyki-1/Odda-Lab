@@ -1,9 +1,10 @@
 import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_down from "../../svg/down.svg"
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { getCompUID } from '../../lib/randomString'
 import ReactDOM from "react-dom/client"
+import { useStore } from '../../zustand/store'
 
 const temp = {
   id: "0",
@@ -43,8 +44,7 @@ const temp = {
 export default function Play() {
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
-  const [selectObj, setSelectObj] = useState<string>()
-  const [list, setList] = useState<string[]>([])
+  const [selectObj, setSelectObj] = useState<HTMLElement>()
   const data = temp;
 
   const handlePointerDown = (e: PointerEvent) => {
@@ -58,12 +58,13 @@ export default function Play() {
     newObj.style.top = clientY - 65 / 2 + "px"
     newObj.style.backgroundImage = target.style.backgroundImage
     document.body.appendChild(newObj)
-    setSelectObj(newObj.id)
+    setSelectObj(newObj)
     const handlePointerMove = (e: PointerEvent) => {
       newObj.style.left = e.clientX - 65 / 2 + "px"
       newObj.style.top = e.clientY - 65 / 2 + "px"
     }
     const handlePointerUp = (e: PointerEvent) => {
+      setSelectObj(undefined)
       const target = e.target as HTMLElement
       const x = e.clientX
       const y = e.clientY
@@ -88,66 +89,218 @@ export default function Play() {
       newObj.style.cursor = "grabbing"
       newObj.style.left = e.clientX - 65 / 2 + "px"
       newObj.style.top = e.clientY - 65 / 2 + "px"
-      setSelectObj(newObj.id)
+      setSelectObj(newObj)
       newObj.addEventListener("pointermove", handlePointerMove)
-      document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
     })
     newObj.addEventListener("pointerup", handlePointerUp)
     newObj.addEventListener("pointermove", handlePointerMove)
-    document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
   }
 
-  const handleTouchStart = (e: TouchEvent) => {
-    const target = e.target as HTMLElement
-    const clientX = e.changedTouches[0].clientX
-    const clientY = e.changedTouches[0].clientY
-    const newObj = document.createElement("div")
-    const uid = getCompUID(16, document)
-    setList([uid, ...list])
-    newObj.id = uid
-    newObj.className = target.id + " " + "object"
-    newObj.style.left = clientX - 65 / 2 + "px"
-    newObj.style.top = clientY - 65 / 2 + "px"
-    newObj.style.backgroundImage = target.style.backgroundImage
-    setSelectObj(newObj.id)
-    document.body.appendChild(newObj)
-    const handleTouchMove = (e: TouchEvent) => {
-      newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
-      newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
-    }
-    const handleTouchEnd = (e: TouchEvent) => {
-      const x = e.changedTouches[0].clientX
-      const y = e.changedTouches[0].clientY
-      const leftCombine = document.getElementById("leftCombine")
-      const rightCombine = document.getElementById("rightCombine")
-      const objectList = document.getElementById("objectList")
-      if (!leftCombine || !rightCombine || !objectList) return
-      if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
-        setLeftObj(newObj.classList[0]);
-        newObj.remove()
-      } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
-        setRightObj(newObj.classList[0]);
-        newObj.remove()
-      } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
-        newObj.remove()
+  const makeHandleTouch = (type: 'left' | 'right' | 'start') => {
+    return (e: TouchEvent) => {
+      let obj = (e.target as HTMLElement | null)?.id
+      if (obj === "left") {
+        obj = leftObj;
+        setLeftObj(undefined)
+      } else if (obj === "right") {
+        obj = rightObj;
+        setRightObj(undefined)
       }
-      document.getElementById("playCont")?.removeEventListener("touchmove", handleTouchMove);
-      target.removeEventListener("touchmove", handleTouchMove);
-    }
-    newObj.addEventListener("touchstart", (e) => {
-      newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
-      newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
-      setSelectObj(newObj.id)
+      const { clientX, clientY } = e.changedTouches[0]
+      const newObj = document.createElement("div")
+      const uid = getCompUID(16, document)
+      newObj.id = uid
+      newObj.className = obj + " " + "object"
+      newObj.style.left = clientX - 65 / 2 + "px"
+      newObj.style.top = clientY - 65 / 2 + "px"
+      newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === obj)?.img})`
+      document.body.appendChild(newObj)
+      setSelectObj(newObj)
+      const handleTouchMove = (e: TouchEvent) => {
+        newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+        newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+      }
+      const handleTouchEnd = (e: TouchEvent) => {
+        setSelectObj(undefined)
+        const target = e.target as HTMLElement
+        const x = e.changedTouches[0].clientX
+        const y = e.changedTouches[0].clientY
+        const leftCombine = document.getElementById("leftCombine")
+        const rightCombine = document.getElementById("rightCombine")
+        const objectList = document.getElementById("objectList")
+        if (!leftCombine || !rightCombine || !objectList) return
+        if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+          setLeftObj(target.classList[0]);
+          target.remove()
+        } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+          setRightObj(target.classList[0]);
+          target.remove()
+        } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+          target.remove()
+        }
+        newObj.style.cursor = "grab"
+        target.removeEventListener("touchmove", handleTouchMove);
+      }
+      newObj.addEventListener("touchstart", (e) => {
+        newObj.style.cursor = "grabbing"
+        newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+        newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+        setSelectObj(newObj)
+        newObj.addEventListener("touchmove", handleTouchMove)
+      })
+      newObj.addEventListener("touchend", handleTouchEnd)
       newObj.addEventListener("touchmove", handleTouchMove)
-      document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
-    })
-    newObj.addEventListener("touchend", handleTouchEnd)
-    newObj.addEventListener("touchmove", handleTouchMove)
-    document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
+    }
   }
+
+  // const handleTouchStart = (e: TouchEvent) => {
+  //   const target = e.target as HTMLElement
+  //   const { clientX, clientY } = e.changedTouches[0]
+  //   const newObj = document.createElement("div")
+  //   const uid = getCompUID(16, document)
+  //   newObj.id = uid
+  //   newObj.className = target.id + " " + "object"
+  //   newObj.style.left = clientX - 65 / 2 + "px"
+  //   newObj.style.top = clientY - 65 / 2 + "px"
+  //   newObj.style.backgroundImage = target.style.backgroundImage
+  //   document.body.appendChild(newObj)
+  //   setSelectObj(newObj)
+  //   const handleTouchMove = (e: TouchEvent) => {
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //   }
+  //   const handleTouchEnd = (e: TouchEvent) => {
+  //     setSelectObj(undefined)
+  //     const target = e.target as HTMLElement
+  //     const x = e.changedTouches[0].clientX
+  //     const y = e.changedTouches[0].clientY
+  //     const leftCombine = document.getElementById("leftCombine")
+  //     const rightCombine = document.getElementById("rightCombine")
+  //     const objectList = document.getElementById("objectList")
+  //     if (!leftCombine || !rightCombine || !objectList) return
+  //     if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+  //       setLeftObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+  //       setRightObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+  //       target.remove()
+  //     }
+  //     newObj.style.cursor = "grab"
+  //     target.removeEventListener("touchmove", handleTouchMove);
+  //   }
+  //   newObj.addEventListener("touchstart", (e) => {
+  //     newObj.style.cursor = "grabbing"
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //     setSelectObj(newObj)
+  //     newObj.addEventListener("touchmove", handleTouchMove)
+  //     // document.getElementById("playCont")?.addEventListener("touchmove", handleTouchMove)
+  //   })
+  //   newObj.addEventListener("touchend", handleTouchEnd)
+  //   newObj.addEventListener("touchmove", handleTouchMove)
+  // }
+
+  // const handleTouchStartLeft = (e: TouchEvent) => {
+  //   const { clientX, clientY } = e.changedTouches[0]
+  //   const newObj = document.createElement("div")
+  //   const uid = getCompUID(16, document)
+  //   newObj.id = uid
+  //   newObj.className = leftObj + " " + "object"
+  //   newObj.style.left = clientX - 65 / 2 + "px"
+  //   newObj.style.top = clientY - 65 / 2 + "px"
+  //   newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === leftObj)?.img})`
+  //   document.body.appendChild(newObj)
+  //   setSelectObj(newObj)
+  //   const handleTouchMove = (e: TouchEvent) => {
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //   }
+  //   const handleTouchEnd = (e: TouchEvent) => {
+  //     setSelectObj(undefined)
+  //     const target = e.target as HTMLElement
+  //     const x = e.changedTouches[0].clientX
+  //     const y = e.changedTouches[0].clientY
+  //     const leftCombine = document.getElementById("leftCombine")
+  //     const rightCombine = document.getElementById("rightCombine")
+  //     const objectList = document.getElementById("objectList")
+  //     if (!leftCombine || !rightCombine || !objectList) return
+  //     if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+  //       setLeftObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+  //       setRightObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+  //       target.remove()
+  //     }
+  //     newObj.style.cursor = "grab"
+
+  //     target.removeEventListener("touchmove", handleTouchMove);
+  //   }
+  //   newObj.addEventListener("touchstart", (e) => {
+  //     newObj.style.cursor = "grabbing"
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //     setSelectObj(newObj)
+  //     newObj.addEventListener("touchmove", handleTouchMove)
+  //   })
+  //   newObj.addEventListener("touchend", handleTouchEnd)
+  //   newObj.addEventListener("touchmove", handleTouchMove)
+  // }
+
+  // const handleTouchStartRight = (e: TouchEvent) => {
+  //   const { clientX, clientY } = e.changedTouches[0]
+  //   const newObj = document.createElement("div")
+  //   const uid = getCompUID(16, document)
+  //   newObj.id = uid
+  //   newObj.className = rightObj + " " + "object"
+  //   newObj.style.left = clientX - 65 / 2 + "px"
+  //   newObj.style.top = clientY - 65 / 2 + "px"
+  //   newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === rightObj)?.img})`
+  //   document.body.appendChild(newObj)
+  //   setSelectObj(newObj)
+  //   const handleTouchMove = (e: TouchEvent) => {
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //   }
+  //   const handleTouchEnd = (e: TouchEvent) => {
+  //     setSelectObj(undefined)
+  //     const target = e.target as HTMLElement
+  //     const x = e.changedTouches[0].clientX
+  //     const y = e.changedTouches[0].clientY
+  //     const leftCombine = document.getElementById("leftCombine")
+  //     const rightCombine = document.getElementById("rightCombine")
+  //     const objectList = document.getElementById("objectList")
+  //     if (!leftCombine || !rightCombine || !objectList) return
+  //     if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+  //       setLeftObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+  //       setRightObj(target.classList[0]);
+  //       target.remove()
+  //     } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+  //       target.remove()
+  //     }
+  //     newObj.style.cursor = "grab"
+
+  //     target.removeEventListener("touchmove", handleTouchMove);
+  //   }
+  //   newObj.addEventListener("touchstart", (e) => {
+  //     newObj.style.cursor = "grabbing"
+  //     newObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+  //     newObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+  //     setSelectObj(newObj)
+  //     newObj.addEventListener("touchmove", handleTouchMove)
+  //   })
+  //   newObj.addEventListener("touchend", handleTouchEnd)
+  //   newObj.addEventListener("touchmove", handleTouchMove)
+  // }
 
   const handleTouchEnd = (e: TouchEvent) => {
-    const target = selectObj ? document.getElementById(selectObj) : null;
+    setSelectObj(undefined)
+    const target = selectObj;
     if (!target) return;
     const handleTouchMove = (e: TouchEvent) => {
       target.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
@@ -168,19 +321,149 @@ export default function Play() {
     } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
       target.remove()
     }
-    document.getElementById("playCont")?.removeEventListener("touchmove", handleTouchMove);
+
     target.removeEventListener("touchmove", handleTouchMove);
   }
 
+  const handleObj = () => {
+    if (typeof navigator !== "object") return;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) return {
+      onTouchStart: makeHandleTouch("start"),
+      onTouchEnd: handleTouchEnd
+    }
+    return {
+      onPointerDown: handlePointerDown,
+    }
+  }
+
+  const handlePointerDownLeft = (e: PointerEvent) => {
+    const { clientX, clientY } = e
+    const newObj = document.createElement("div")
+    newObj.id = getCompUID(16, document)
+    newObj.className = leftObj + " " + "object"
+    newObj.style.left = clientX - 65 / 2 + "px"
+    newObj.style.top = clientY - 65 / 2 + "px"
+    newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === leftObj)?.img})`
+    document.body.appendChild(newObj)
+    setSelectObj(newObj)
+    const handlePointerMove = (e: PointerEvent) => {
+      newObj.style.left = e.clientX - 65 / 2 + "px"
+      newObj.style.top = e.clientY - 65 / 2 + "px"
+    }
+    const handlePointerUp = (e: PointerEvent) => {
+      setSelectObj(undefined)
+      const target = e.target as HTMLElement
+      const x = e.clientX
+      const y = e.clientY
+      const leftCombine = document.getElementById("leftCombine")
+      const rightCombine = document.getElementById("rightCombine")
+      const objectList = document.getElementById("objectList")
+      if (!leftCombine || !rightCombine || !objectList) return
+      if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+        setLeftObj(target.classList[0]);
+        target.remove()
+      } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+        setRightObj(target.classList[0]);
+        target.remove()
+      } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+        target.remove()
+      }
+      newObj.style.cursor = "grab"
+      document.getElementById("playCont")?.removeEventListener("pointermove", handlePointerMove);
+      target.removeEventListener("pointermove", handlePointerMove);
+    }
+    newObj.addEventListener("pointerdown", (e) => {
+      newObj.style.cursor = "grabbing"
+      newObj.style.left = e.clientX - 65 / 2 + "px"
+      newObj.style.top = e.clientY - 65 / 2 + "px"
+      setSelectObj(newObj)
+      newObj.addEventListener("pointermove", handlePointerMove)
+      // document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
+    })
+    newObj.addEventListener("pointerup", handlePointerUp)
+    newObj.addEventListener("pointermove", handlePointerMove)
+    // document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
+    setLeftObj(undefined)
+  }
+
+  const handlePointerDownRight = (e: PointerEvent) => {
+    const { clientX, clientY } = e
+    const newObj = document.createElement("div")
+    newObj.id = getCompUID(16, document)
+    newObj.className = rightObj + " " + "object"
+    newObj.style.left = clientX - 65 / 2 + "px"
+    newObj.style.top = clientY - 65 / 2 + "px"
+    newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === rightObj)?.img})`
+    document.body.appendChild(newObj)
+    setSelectObj(newObj)
+    const handlePointerMove = (e: PointerEvent) => {
+      newObj.style.left = e.clientX - 65 / 2 + "px"
+      newObj.style.top = e.clientY - 65 / 2 + "px"
+    }
+    const handlePointerUp = (e: PointerEvent) => {
+      setSelectObj(undefined)
+      const target = e.target as HTMLElement
+      const x = e.clientX
+      const y = e.clientY
+      const leftCombine = document.getElementById("leftCombine")
+      const rightCombine = document.getElementById("rightCombine")
+      const objectList = document.getElementById("objectList")
+      if (!leftCombine || !rightCombine || !objectList) return
+      if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+        setLeftObj(target.classList[0]);
+        target.remove()
+      } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+        setRightObj(target.classList[0]);
+        target.remove()
+      } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+        target.remove()
+      }
+      newObj.style.cursor = "grab"
+      document.getElementById("playCont")?.removeEventListener("pointermove", handlePointerMove);
+      target.removeEventListener("pointermove", handlePointerMove);
+    }
+    newObj.addEventListener("pointerdown", (e) => {
+      newObj.style.cursor = "grabbing"
+      newObj.style.left = e.clientX - 65 / 2 + "px"
+      newObj.style.top = e.clientY - 65 / 2 + "px"
+      setSelectObj(newObj)
+      newObj.addEventListener("pointermove", handlePointerMove)
+      // document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
+    })
+    newObj.addEventListener("pointerup", handlePointerUp)
+    newObj.addEventListener("pointermove", handlePointerMove)
+    // document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
+    setRightObj(undefined)
+  }
+
+  const handleCombine = (place: "left" | "right") => {
+    if (typeof navigator !== "object") return;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (place === "left" && isMobile) return { onTouchStart: makeHandleTouch("left") }
+    else if (place === "left" && !isMobile) return { onPointerDown: handlePointerDownLeft }
+    else if (place === "right" && isMobile) return { onTouchStart: makeHandleTouch("right") }
+    else if (place === "right" && !isMobile) return { onPointerDown: handlePointerDownRight }
+  }
+
+  useEffect(() => {
+    console.log(selectObj)
+  }, [selectObj])
+
   return (
-    <Container id="playCont">
-      <Header>
-        {
-          list.map((item, key) => (
-            <h3 key={key}>{item}</h3>
-          ))
-        }
-      </Header>
+    <Container id="playCont"
+      onTouchMove={(e: TouchEvent) => {
+        if (!selectObj) return;
+        selectObj.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
+        selectObj.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
+      }}
+      onPointerMove={(e: PointerEvent) => {
+        if (!selectObj) return;
+        selectObj.style.left = e.clientX - 65 / 2 + "px"
+        selectObj.style.top = e.clientY - 65 / 2 + "px"
+      }}
+    >
+      <Header></Header>
       <Main>
         <Contents>
           <ObjectBackground id="objectList">
@@ -195,10 +478,8 @@ export default function Play() {
                     <Object key={key}>
                       <ObjectImg
                         id={value.id}
-                        onPointerDown={handlePointerDown}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
                         style={{ backgroundImage: `url("${value.img}")` }}
+                        {...handleObj()}
                       />
                       <h1>{value.name}</h1>
                     </Object>
@@ -214,115 +495,19 @@ export default function Play() {
               <Combine
                 id="leftCombine"
                 style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
-                onPointerDown={(e: PointerEvent) => {
-                  const { clientX, clientY } = e
-                  const newObj = document.createElement("div")
-                  newObj.id = getCompUID(16, document)
-                  newObj.className = leftObj + " " + "object"
-                  newObj.style.left = clientX - 65 / 2 + "px"
-                  newObj.style.top = clientY - 65 / 2 + "px"
-                  newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === leftObj)?.img})`
-                  document.body.appendChild(newObj)
-                  setSelectObj(newObj.id)
-                  const handlePointerMove = (e: PointerEvent) => {
-                    newObj.style.left = e.clientX - 65 / 2 + "px"
-                    newObj.style.top = e.clientY - 65 / 2 + "px"
-                  }
-                  const handlePointerUp = (e: PointerEvent) => {
-                    const target = e.target as HTMLElement
-                    const x = e.clientX
-                    const y = e.clientY
-                    const leftCombine = document.getElementById("leftCombine")
-                    const rightCombine = document.getElementById("rightCombine")
-                    const objectList = document.getElementById("objectList")
-                    if (!leftCombine || !rightCombine || !objectList) return
-                    if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
-                      setLeftObj(target.classList[0]);
-                      target.remove()
-                    } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
-                      setRightObj(target.classList[0]);
-                      target.remove()
-                    } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
-                      target.remove()
-                    }
-                    newObj.style.cursor = "grab"
-                    document.getElementById("playCont")?.removeEventListener("pointermove", handlePointerMove);
-                    target.removeEventListener("pointermove", handlePointerMove);
-                  }
-                  newObj.addEventListener("pointerdown", (e) => {
-                    newObj.style.cursor = "grabbing"
-                    newObj.style.left = e.clientX - 65 / 2 + "px"
-                    newObj.style.top = e.clientY - 65 / 2 + "px"
-                    setSelectObj(newObj.id)
-                    newObj.addEventListener("pointermove", handlePointerMove)
-                    document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
-                  })
-                  newObj.addEventListener("pointerup", handlePointerUp)
-                  newObj.addEventListener("pointermove", handlePointerMove)
-                  document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
-                  setLeftObj(undefined)
-                }}
-                onTouchStart={handleTouchStart}
+                {...handleCombine("left")}
               />
               <Plus />
               <Combine
                 id="rightCombine"
                 style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
-                onPointerDown={(e: PointerEvent) => {
-                  const { clientX, clientY } = e
-                  const newObj = document.createElement("div")
-                  newObj.id = getCompUID(16, document)
-                  newObj.className = rightObj + " " + "object"
-                  newObj.style.left = clientX - 65 / 2 + "px"
-                  newObj.style.top = clientY - 65 / 2 + "px"
-                  newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === rightObj)?.img})`
-                  document.body.appendChild(newObj)
-                  setSelectObj(newObj.id)
-                  const handlePointerMove = (e: PointerEvent) => {
-                    newObj.style.left = e.clientX - 65 / 2 + "px"
-                    newObj.style.top = e.clientY - 65 / 2 + "px"
-                  }
-                  const handlePointerUp = (e: PointerEvent) => {
-                    const target = e.target as HTMLElement
-                    const x = e.clientX
-                    const y = e.clientY
-                    const leftCombine = document.getElementById("leftCombine")
-                    const rightCombine = document.getElementById("rightCombine")
-                    const objectList = document.getElementById("objectList")
-                    if (!leftCombine || !rightCombine || !objectList) return
-                    if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
-                      setLeftObj(target.classList[0]);
-                      target.remove()
-                    } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
-                      setRightObj(target.classList[0]);
-                      target.remove()
-                    } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
-                      target.remove()
-                    }
-                    newObj.style.cursor = "grab"
-                    document.getElementById("playCont")?.removeEventListener("pointermove", handlePointerMove);
-                    target.removeEventListener("pointermove", handlePointerMove);
-                  }
-                  newObj.addEventListener("pointerdown", (e) => {
-                    newObj.style.cursor = "grabbing"
-                    newObj.style.left = e.clientX - 65 / 2 + "px"
-                    newObj.style.top = e.clientY - 65 / 2 + "px"
-                    setSelectObj(newObj.id)
-                    newObj.addEventListener("pointermove", handlePointerMove)
-                    document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
-                  })
-                  newObj.addEventListener("pointerup", handlePointerUp)
-                  newObj.addEventListener("pointermove", handlePointerMove)
-                  document.getElementById("playCont")?.addEventListener("pointermove", handlePointerMove)
-                  setRightObj(undefined)
-                }}
-                onTouchStart={handleTouchStart}
+                {...handleCombine("right")}
               />
             </CombineWrap>
             <div style={{ height: "15%" }}></div>
           </MainContent>
         </Contents>
-        <Ads>Ads</Ads>
+        <Ads>Ad</Ads>
       </Main>
     </Container>
   )
@@ -333,6 +518,7 @@ const Container = styled.div`
   min-height:100vh;
   display:flex;
   flex-direction: column;
+  overflow: none;
 `
 const Header = styled.header`
   width:100vw;

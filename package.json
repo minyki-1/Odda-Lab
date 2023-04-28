@@ -22,7 +22,8 @@
     "react": "latest",
     "react-dom": "latest",
     "react-draggable": "^4.4.5",
-    "styled-components": "latest"
+    "styled-components": "latest",
+    "zustand": "^4.3.7"
   },
   "devDependencies": {
     "@svgr/webpack": "latest",
