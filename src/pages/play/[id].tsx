@@ -98,10 +98,12 @@ export default function Play() {
           target.remove()
         }
         newObj.style.cursor = "grab"
+        newObj.style.zIndex = "1"
         target.removeEventListener(moveEventName, handleMove);
       }
       newObj.addEventListener(startEventName, (e) => {
         newObj.style.cursor = "grabbing"
+        newObj.style.zIndex = "100"
         const { x, y } = getLocate(e)
         newObj.style.left = x - 65 / 2 + "px"
         newObj.style.top = y - 65 / 2 + "px"

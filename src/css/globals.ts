@@ -53,7 +53,7 @@ export const GlobalStyle = createGlobalStyle`
     height:65px;
     cursor:grabbing;
     position: absolute;
-    z-index: 100;
+    z-index: 1;
     border-radius: 100px;
     background-color: white;
     background-position: center center;
