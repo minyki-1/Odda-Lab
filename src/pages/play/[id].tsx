@@ -134,13 +134,19 @@ export default function Play() {
     const rightCombine = document.getElementById("rightCombine")
     const objectList = document.getElementById("objectList")
     if (!leftCombine || !rightCombine || !objectList) return
-    if (leftCombine.offsetLeft < x && leftCombine.offsetLeft + rightCombine.offsetWidth > x && leftCombine.offsetTop < y && leftCombine.offsetTop + leftCombine.offsetHeight > y) {
+    const checkObjIn = (elem: HTMLElement) => {
+      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = elem
+      const checkLeft = offsetLeft < x && offsetLeft + offsetWidth > x
+      const checkTop = offsetTop < y && offsetTop + offsetHeight > y
+      return checkLeft && checkTop
+    }
+    if (checkObjIn(leftCombine)) {
       setLeftObj(target.classList[0]);
       target.remove()
-    } else if (rightCombine.offsetLeft < x && rightCombine.offsetLeft + rightCombine.offsetWidth > x && rightCombine.offsetTop < y && rightCombine.offsetTop + rightCombine.offsetHeight > y) {
+    } else if (checkObjIn(rightCombine)) {
       setRightObj(target.classList[0]);
       target.remove()
-    } else if (objectList.offsetLeft < x && objectList.offsetLeft + objectList.offsetWidth > x && objectList.offsetTop < y && objectList.offsetTop + objectList.offsetHeight > y) {
+    } else if (checkObjIn(objectList)) {
       target.remove()
     }
     target.removeEventListener("touchmove", handleTouchMove);
@@ -172,6 +178,12 @@ export default function Play() {
     if (!checkMobileEvent && !checkPCEvent) return;
     selectObj.style.left = x - 65 / 2 + "px"
     selectObj.style.top = y - 65 / 2 + "px"
+  }
+
+  const findObjValueById = (id: string | undefined, value: "img" | "id" | "name") => {
+    const result = data.objects.find(value => id === value.id)
+    if (!result) return undefined
+    return result[value]
   }
 
   return (
@@ -211,13 +223,13 @@ export default function Play() {
             <CombineWrap>
               <Combine
                 id="leftCombine"
-                style={{ backgroundImage: `url(${data.objects.find(value => value.id === leftObj)?.img})` }}
+                style={{ backgroundImage: `url(${findObjValueById(leftObj, "img")})` }}
                 {...handleCombine("left")}
               />
               <Plus />
               <Combine
                 id="rightCombine"
-                style={{ backgroundImage: `url(${data.objects.find(value => value.id === rightObj)?.img})` }}
+                style={{ backgroundImage: `url(${findObjValueById(rightObj, "img")})` }}
                 {...handleCombine("right")}
               />
             </CombineWrap>
