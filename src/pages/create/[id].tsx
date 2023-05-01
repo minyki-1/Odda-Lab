@@ -1,7 +1,8 @@
 import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_arrow_right from "../../svg/arrow-right.svg"
-import SVG_plus_circle from "../../svg/plus-circle.svg"
+import SVG_cross from "../../svg/cross.svg"
+import SVG_pencil from "../../svg/pencil.svg"
 import { useState, useEffect } from 'react'
 
 interface IData {
@@ -54,6 +55,8 @@ const temp: IData = {
 export default function Create() {
   const [datas, setDatas] = useState(temp);
   const [selectObj, setSelectObj] = useState<string>()
+  const [newObjModal, setNewObjModal] = useState<"start" | "combine">()
+
   const objImgProps = (data: string) => ({
     id: data,
     onClick: handleOnClick,
@@ -114,7 +117,32 @@ export default function Create() {
   }
 
   return (
-    <Container onClick={(e: MouseEvent) => { if (selectObj && (e.target as HTMLElement).className.indexOf('obj') === -1) setSelectObj(undefined) }}>
+    <Container onClick={(e: MouseEvent) => {
+      const { className } = (e.target as HTMLElement);
+      if (selectObj && !className && className.indexOf('obj') === -1) setSelectObj(undefined);
+    }}>
+      {
+        newObjModal ?
+          <NewObjModalBg>
+            <NewObjModal>
+              <NewObjModalHeader>
+                <h1>새 오브젝트</h1>
+                <SVG_cross onClick={() => { setNewObjModal(undefined) }} width={36} height={36} />
+              </NewObjModalHeader>
+              <NewObjModalImg onClick={() => {
+
+              }}
+                img="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506">
+                <span></span>
+                <div>
+                  <SVG_pencil fill="white" width="90" height="90" />
+                </div>
+              </NewObjModalImg>
+              <input type="text" />
+            </NewObjModal>
+          </NewObjModalBg>
+          : null
+      }
       <Header></Header>
       <Main>
         <Contents>
@@ -124,7 +152,7 @@ export default function Create() {
         <ObjectContent>
           <TitleWrap>
             <h1>시작 오브젝트</h1>
-            <button>
+            <button onClick={() => setNewObjModal("start")}>
               <SVG_plus width="28" height="28" />
             </button>
           </TitleWrap>
@@ -140,7 +168,7 @@ export default function Create() {
           </ObjectList>
           <TitleWrap>
             <h1>조합 오브젝트</h1>
-            <button>
+            <button onClick={() => setNewObjModal("start")}>
               <SVG_plus width="28" height="28" />
             </button>
           </TitleWrap>
@@ -308,6 +336,83 @@ const TitleWrap = styled.div`
     padding: 4px;
     &:hover{
       background-color: #e0e0e0;
+    }
+  }
+`
+const NewObjModalBg = styled.div`
+  width:100vw;
+  height:100vh;
+  z-index: 999;
+  background-color: rgba(0,0,0,0.25);
+  backdrop-filter: blur(2.5px);
+  position: fixed;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+`
+const NewObjModal = styled.div`
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background-color: white;
+  width:310px;
+  aspect-ratio:3 / 4;
+  input{
+    border:none;
+    background-color: #e9e9e9;
+    width:75%;
+    padding:12px 18px;
+    text-align: center;
+    margin: 30px;
+    font-size: 18px;
+  }
+`
+const NewObjModalHeader = styled.div`
+  margin-bottom: 16px;
+  display:flex;
+  width:100%;
+  align-items: center;
+  justify-content: space-between;
+  h1{
+    width:100%;
+    font-size: 22px;
+  }
+  svg{
+    cursor:pointer;
+  }
+`
+const NewObjModalImg = styled.div<{ img: string }>`
+  cursor: pointer;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  span{
+    width:170px;
+    height:170px;
+    border-radius: 100px;
+    background-color: #dadada;
+    background-position: center center;
+    background-repeat: repeat-x;
+    background-size: cover;
+    display:flex;
+    position:absolute;
+    background-image: ${({ img }: { img: string }) => `url(${img})`};
+  }
+  div{
+    width:170px;
+    height:170px;
+    border-radius: 200px;
+    background-color: rgba(0, 0, 0, 0.25);
+    display:none;
+    align-items: center;
+    justify-content: center;
+    position:absolute;
+  }
+  &:hover{
+    div{
+      display:flex;
     }
   }
 `
