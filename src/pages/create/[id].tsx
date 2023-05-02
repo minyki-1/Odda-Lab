@@ -56,6 +56,7 @@ export default function Create() {
   const [datas, setDatas] = useState(temp);
   const [selectObj, setSelectObj] = useState<string>()
   const [newObjModal, setNewObjModal] = useState<"start" | "combine">()
+  const [testImg, setTestImg] = useState("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506")
 
   const objImgProps = (data: string) => ({
     id: data,
@@ -129,15 +130,37 @@ export default function Create() {
                 <h1>새 오브젝트</h1>
                 <SVG_cross onClick={() => { setNewObjModal(undefined) }} width={36} height={36} />
               </NewObjModalHeader>
-              <NewObjModalImg onClick={() => {
-
-              }}
-                img="https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506">
+              <NewObjModalImg htmlFor="modalInput" img={testImg}>
                 <span></span>
                 <div>
                   <SVG_pencil fill="white" width="90" height="90" />
                 </div>
               </NewObjModalImg>
+              <input
+                type="file"
+                id="modalInput"
+                accept="image/*"
+                onChange={(e) => {
+                  const input = e.target as HTMLInputElement
+                  const files = input.files;
+                  if (!files) return;
+                  const reader = new FileReader();
+                  // reader.readAsDataURL(files[0]);
+                  // reader.onload = function () {
+                  //   console.log(reader.result)
+                  // }
+                  reader.readAsArrayBuffer(files[0]);
+                  reader.onload = () => {
+                    const renderResult = reader.result
+                    if (!renderResult) return;
+                    const blob = new Blob([renderResult], { type: files[0].type });
+                    const url = URL.createObjectURL(blob);
+                    console.log(blob, url)
+                    setTestImg(url)
+                  };
+                }}
+                style={{ display: "none" }}
+              />
               <input type="text" />
             </NewObjModal>
           </NewObjModalBg>
@@ -383,7 +406,7 @@ const NewObjModalHeader = styled.div`
     cursor:pointer;
   }
 `
-const NewObjModalImg = styled.div<{ img: string }>`
+const NewObjModalImg = styled.label<{ img: string }>`
   cursor: pointer;
   display:flex;
   align-items: center;
