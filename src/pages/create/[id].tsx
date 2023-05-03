@@ -64,7 +64,6 @@ export default function Create() {
     size: selectObj === data ? "60" : "50",
     img: findObjValueById(data, "img") ?? "",
     className: "obj",
-    // shadow: selectObj === data ? "0px 0px 10px 2.5px rgba(10, 85, 236, 0.3)" : "",
     border: selectObj === data ? "3px solid rgb(75, 124, 222)" : "",
   })
 
