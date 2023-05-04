@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_down from "../../svg/down.svg"
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getCompUID } from '../../lib/randomString'
 
 type TDndEvent = PointerEvent | TouchEvent
@@ -43,7 +43,11 @@ const temp = {
 export default function Play() {
   const [leftObj, setLeftObj] = useState<string>()
   const [rightObj, setRightObj] = useState<string>()
-  const [selectObj, setSelectObj] = useState<HTMLElement>()
+  const [selectObj, setSelectObj] = useState<string>()
+  const leftCombine = useRef<HTMLElement>(null);
+  const rightCombine = useRef<HTMLElement>(null);
+  const objectList = useRef<HTMLElement>(null);
+  const [dndObjs, setDndObjs] = useState<{ id: string, className: string, x: number, y: number }[]>([])
   const data = temp;
 
   const makeHandleDnd = (place: 'left' | 'right' | 'start') => {
@@ -56,62 +60,10 @@ export default function Play() {
         obj = rightObj;
         setRightObj(undefined)
       }
-      const moveEventName = "clientX" in e ? "pointermove" : "touchmove"
-      const startEventName = "clientX" in e ? "pointerdown" : "touchstart"
-      const endEventName = "clientX" in e ? "pointerup" : "touchend"
+      const id = getCompUID(16, document)
+      setSelectObj(id)
       const { x, y } = getLocate(e)
-      const newObj = document.createElement("div")
-      const uid = getCompUID(16, document)
-      newObj.id = uid
-      newObj.className = obj + " " + "object"
-      newObj.style.left = x - 65 / 2 + "px"
-      newObj.style.top = y - 65 / 2 + "px"
-      newObj.style.backgroundImage = `url(${data.objects.find(value => value.id === obj)?.img})`
-      document.body.appendChild(newObj)
-      setSelectObj(newObj)
-      const handleMove = (e: TDndEvent) => {
-        const { x, y } = getLocate(e)
-        newObj.style.left = x - 65 / 2 + "px"
-        newObj.style.top = y - 65 / 2 + "px"
-      }
-      const handleEnd = (e: TDndEvent) => {
-        setSelectObj(undefined)
-        const target = e.target as HTMLElement
-        const { x, y } = getLocate(e)
-        const leftCombine = document.getElementById("leftCombine")
-        const rightCombine = document.getElementById("rightCombine")
-        const objectList = document.getElementById("objectList")
-        if (!leftCombine || !rightCombine || !objectList) return
-        const checkObjIn = (elem: HTMLElement) => {
-          const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = elem
-          const checkLeft = offsetLeft < x && offsetLeft + offsetWidth > x
-          const checkTop = offsetTop < y && offsetTop + offsetHeight > y
-          return checkLeft && checkTop
-        }
-        if (checkObjIn(leftCombine)) {
-          setLeftObj(target.classList[0]);
-          target.remove()
-        } else if (checkObjIn(rightCombine)) {
-          setRightObj(target.classList[0]);
-          target.remove()
-        } else if (checkObjIn(objectList)) {
-          target.remove()
-        }
-        newObj.style.cursor = "grab"
-        newObj.style.zIndex = "1"
-        target.removeEventListener(moveEventName, handleMove);
-      }
-      newObj.addEventListener(startEventName, (e) => {
-        newObj.style.cursor = "grabbing"
-        newObj.style.zIndex = "100"
-        const { x, y } = getLocate(e)
-        newObj.style.left = x - 65 / 2 + "px"
-        newObj.style.top = y - 65 / 2 + "px"
-        setSelectObj(newObj)
-        newObj.addEventListener(moveEventName, handleMove)
-      })
-      newObj.addEventListener(endEventName, handleEnd)
-      newObj.addEventListener(moveEventName, handleMove)
+      if (obj) setDndObjs([...dndObjs, { id, className: obj, x, y }])
     }
   }
 
@@ -120,64 +72,31 @@ export default function Play() {
     return { x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY }
   }
 
-  const handleTouchEnd = (e: TouchEvent) => {
-    setSelectObj(undefined)
-    const target = selectObj;
-    if (!target) return;
-    const handleTouchMove = (e: TouchEvent) => {
-      target.style.left = e.changedTouches[0].clientX - 65 / 2 + "px"
-      target.style.top = e.changedTouches[0].clientY - 65 / 2 + "px"
-    }
-    const x = e.changedTouches[0].clientX
-    const y = e.changedTouches[0].clientY
-    const leftCombine = document.getElementById("leftCombine")
-    const rightCombine = document.getElementById("rightCombine")
-    const objectList = document.getElementById("objectList")
-    if (!leftCombine || !rightCombine || !objectList) return
-    const checkObjIn = (elem: HTMLElement) => {
-      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = elem
-      const checkLeft = offsetLeft < x && offsetLeft + offsetWidth > x
-      const checkTop = offsetTop < y && offsetTop + offsetHeight > y
-      return checkLeft && checkTop
-    }
-    if (checkObjIn(leftCombine)) {
-      setLeftObj(target.classList[0]);
-      target.remove()
-    } else if (checkObjIn(rightCombine)) {
-      setRightObj(target.classList[0]);
-      target.remove()
-    } else if (checkObjIn(objectList)) {
-      target.remove()
-    }
-    target.removeEventListener("touchmove", handleTouchMove);
-  }
-
   const handleObj = () => {
     if (typeof navigator !== "object") return;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) return {
-      onTouchStart: makeHandleDnd("start"),
-      onTouchEnd: handleTouchEnd
-    }
+    if (isMobile) return { onTouchStart: makeHandleDnd("start"), onTouchEnd: handleDndDrop }
     return { onPointerDown: makeHandleDnd("start") }
   }
 
   const handleCombine = (place: "left" | "right") => {
     if (typeof navigator !== "object") return;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) return { onTouchStart: makeHandleDnd(place) }
+    if (isMobile) return { onTouchStart: makeHandleDnd(place), onTouchEnd: handleDndDrop }
     else if (!isMobile) return { onPointerDown: makeHandleDnd(place) }
   }
 
   const handleMove = (e: TDndEvent) => {
+    e.preventDefault()
     if (typeof navigator !== "object" || !selectObj) return;
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const { x, y } = getLocate(e)
     const checkMobileEvent = isMobile && "changedTouches" in e
     const checkPCEvent = !isMobile && "clientX" in e
-    if (!checkMobileEvent && !checkPCEvent) return;
-    selectObj.style.left = x - 65 / 2 + "px"
-    selectObj.style.top = y - 65 / 2 + "px"
+    const obj = document.getElementById(selectObj)
+    if ((!checkMobileEvent && !checkPCEvent) || !obj) return;
+    obj.style.left = x - 65 / 2 + "px"
+    obj.style.top = y - 65 / 2 + "px"
   }
 
   const findObjValueById = (id: string | undefined, value: "img" | "id" | "name") => {
@@ -186,16 +105,96 @@ export default function Play() {
     return result[value]
   }
 
+  const handleDndObj = () => {
+    if (typeof navigator !== "object") return;
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) return {
+      onTouchStart: handleDndGrap,
+      onTouchEnd: handleDndDrop,
+      onTouchMove: handleMove
+    }
+    return {
+      onPointerDown: handleDndGrap,
+      onPointerUp: handleDndDrop,
+      onPointerMove: handleMove
+    }
+  }
+
+  const handleDndGrap = (e: TDndEvent) => {
+    e.preventDefault()
+    const target = e.target as HTMLElement
+    target.style.cursor = "grabbing"
+    target.style.zIndex = "100"
+    const { x, y } = getLocate(e)
+    target.style.left = x - 65 / 2 + "px"
+    target.style.top = y - 65 / 2 + "px"
+    setSelectObj(target.id)
+  }
+
+  const handleDndDrop = (e: TDndEvent) => {
+    e.preventDefault()
+    const target = selectObj ? document.getElementById(selectObj) : null;
+    if (!target) return;
+    const { x, y } = getLocate(e)
+    const checkObjIn = (elem: HTMLElement | null) => {
+      if (!elem) return
+      const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = elem
+      const checkLeft = offsetLeft < x && offsetLeft + offsetWidth > x
+      const checkTop = offsetTop < y && offsetTop + offsetHeight > y
+      return checkLeft && checkTop
+    }
+    if (checkObjIn(leftCombine.current)) {
+      setLeftObj(target.classList[target.classList.length - 1]);
+      target.remove()
+    } else if (checkObjIn(rightCombine.current)) {
+      setRightObj(target.classList[target.classList.length - 1]);
+      target.remove()
+    } else if (checkObjIn(objectList.current)) {
+      target.remove()
+    }
+    setSelectObj(undefined)
+    target.style.cursor = "grab"
+    target.style.zIndex = "1"
+  }
+
+  const disablePullToRefresh = () => {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) return;
+
+    const preventPullToRefresh = (event: TouchEvent) => event.preventDefault();
+    window.addEventListener("touchmove", preventPullToRefresh, { passive: false });
+    return () => {
+      window.removeEventListener("touchmove", preventPullToRefresh);
+    };
+  }
+
+  useEffect(() => {
+    return disablePullToRefresh();
+  }, []);
+
   return (
     <Container
-      id="playCont"
       onTouchMove={handleMove}
       onPointerMove={handleMove}
     >
+      {
+        dndObjs.map(({ id, className, x, y }, key) => (
+          <DndObject
+            style={{
+              backgroundImage: `url("${data.objects.find(value => value.id === className)?.img}")`,
+              left: x - 65 / 2, top: y - 65 / 2
+            }}
+            key={key}
+            id={id}
+            className={className}
+            {...handleDndObj()}
+          />
+        ))
+      }
       <Header></Header>
       <Main>
         <Contents>
-          <ObjectBackground id="objectList">
+          <ObjectBackground ref={objectList}>
             <ObjectHeader>
               <h1>오브젝트</h1>
               <DownBtn />
@@ -222,13 +221,13 @@ export default function Play() {
             </Title>
             <CombineWrap>
               <Combine
-                id="leftCombine"
+                ref={leftCombine}
                 style={{ backgroundImage: `url(${findObjValueById(leftObj, "img")})` }}
                 {...handleCombine("left")}
               />
               <Plus />
               <Combine
-                id="rightCombine"
+                ref={rightCombine}
                 style={{ backgroundImage: `url(${findObjValueById(rightObj, "img")})` }}
                 {...handleCombine("right")}
               />
@@ -419,4 +418,16 @@ const DownBtn = styled(SVG_down)`
     width:20px;
     height:20px; 
   }
+`
+const DndObject = styled.div<{ img: string }>`
+  width:65px;
+  height:65px;
+  cursor:grabbing;
+  position: absolute;
+  z-index: 1;
+  border-radius: 100px;
+  background-color: white;
+  background-position: center center;
+  background-repeat: repeat-x;
+  background-size: cover;
 `

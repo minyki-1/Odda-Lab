@@ -1,9 +1,12 @@
 import type { AppProps } from 'next/app'
-import { Inter } from '@next/font/google'
+import { Noto_Sans_KR } from '@next/font/google'
 import { GlobalStyle } from '../css/globals';
-import Script from 'next/script'
 
-const font = Inter({ subsets: ['latin'] });
+const font = Noto_Sans_KR({
+  weight: "400",
+  display: "fallback",
+  subsets: ["latin"],
+});
 
 export default function App({ Component, pageProps }: AppProps) {
   return (

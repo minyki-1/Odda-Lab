@@ -129,12 +129,12 @@ export default function Create() {
                 <h1>새 오브젝트</h1>
                 <SVG_cross onClick={() => { setNewObjModal(undefined) }} width={36} height={36} />
               </NewObjModalHeader>
-              <NewObjModalImg htmlFor="modalInput" img={testImg}>
+              <NewObjModalLab htmlFor="modalInput" img={testImg}>
                 <span></span>
                 <div>
-                  <SVG_pencil fill="white" width="90" height="90" />
+                  <SVG_pencil fill="white" width="70" height="70" />
                 </div>
-              </NewObjModalImg>
+              </NewObjModalLab>
               <input
                 type="file"
                 id="modalInput"
@@ -175,7 +175,7 @@ export default function Create() {
           <TitleWrap>
             <h1>시작 오브젝트</h1>
             <button onClick={() => setNewObjModal("start")}>
-              <SVG_plus width="28" height="28" />
+              <SVG_plus width="22" height="22" />
             </button>
           </TitleWrap>
           <ObjectList>
@@ -191,7 +191,7 @@ export default function Create() {
           <TitleWrap>
             <h1>조합 오브젝트</h1>
             <button onClick={() => setNewObjModal("start")}>
-              <SVG_plus width="28" height="28" />
+              <SVG_plus width="22" height="22" />
             </button>
           </TitleWrap>
           <ObjectList>
@@ -211,7 +211,7 @@ export default function Create() {
               newData.combinate.unshift(["", "", ""])
               setDatas(newData)
             }}>
-              <SVG_plus width="28" height="28" />
+              <SVG_plus width="22" height="22" />
             </button>
           </TitleWrap>
           {
@@ -304,7 +304,7 @@ const Object = styled.div`
   margin-right: 16px;
   h1{
     margin-top: 12px;
-    font-size: 16px;
+    font-size: 15px;
     color:black;
   }
   @media screen and (max-width: 800px) {
@@ -347,8 +347,8 @@ const TitleWrap = styled.div`
   margin-top: 36px;
   margin-bottom: 24px;
   h1{
-    font-size: 20px;
-    margin-right: 14px;
+    font-size: 16px;
+    margin-right: 8px;
   }
   button{
     border: none;
@@ -405,7 +405,7 @@ const NewObjModalHeader = styled.div`
     cursor:pointer;
   }
 `
-const NewObjModalImg = styled.label<{ img: string }>`
+const NewObjModalLab = styled.label<{ img: string }>`
   cursor: pointer;
   display:flex;
   align-items: center;
