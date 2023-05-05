@@ -4,6 +4,9 @@ import SVG_arrow_right from "../../svg/arrow-right.svg"
 import SVG_cross from "../../svg/cross.svg"
 import SVG_pencil from "../../svg/pencil.svg"
 import { useState, useEffect } from 'react'
+import Compressor from 'compressorjs'
+import { cropImage } from '../../lib/image'
+import Image from 'next/image'
 
 interface IData {
   id: string,
@@ -57,6 +60,8 @@ export default function Create() {
   const [selectObj, setSelectObj] = useState<string>()
   const [newObjModal, setNewObjModal] = useState<"start" | "combine">()
   const [testImg, setTestImg] = useState("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506")
+  const [formData, setFormData] = useState<FormData>()
+  const [displayImg, setDisplayImg] = useState<string>()
 
   const objImgProps = (data: string) => ({
     id: data,
@@ -130,33 +135,25 @@ export default function Create() {
                 <SVG_cross onClick={() => { setNewObjModal(undefined) }} width={36} height={36} />
               </NewObjModalHeader>
               <NewObjModalLab htmlFor="modalInput" img={testImg}>
-                <span></span>
+                <Image src={testImg} alt="object" width={170} height={170} />
                 <div>
-                  <SVG_pencil fill="white" width="70" height="70" />
+                  <SVG_pencil fill="white" width="60" height="60" />
                 </div>
               </NewObjModalLab>
               <input
                 type="file"
                 id="modalInput"
                 accept="image/*"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const input = e.target as HTMLInputElement
                   const files = input.files;
                   if (!files) return;
-                  const reader = new FileReader();
-                  // reader.readAsDataURL(files[0]);
-                  // reader.onload = function () {
-                  //   console.log(reader.result)
-                  // }
-                  reader.readAsArrayBuffer(files[0]);
-                  reader.onload = () => {
-                    const renderResult = reader.result
-                    if (!renderResult) return;
-                    const blob = new Blob([renderResult], { type: files[0].type });
-                    const url = URL.createObjectURL(blob);
-                    console.log(blob, url)
-                    setTestImg(url)
-                  };
+                  const croppedImg = await cropImage(files[0], 360)
+                  setTestImg(URL.createObjectURL(croppedImg))
+                  const newFormData = new FormData();
+                  newFormData.append('file', croppedImg);
+                  newFormData.append('data', JSON.stringify({ ownerId: "0" }));
+                  setFormData(newFormData)
                 }}
                 style={{ display: "none" }}
               />
@@ -165,10 +162,25 @@ export default function Create() {
           </NewObjModalBg>
           : null
       }
-      <Header></Header>
+      <Header>
+        <button onClick={async () => {
+          const response = await fetch('http://localhost:3000/upload', {
+            method: 'POST',
+            body: formData
+          });
+          console.log(response)
+        }}>전달</button>
+        <button onClick={async () => {
+          const response = await fetch('http://localhost:3000/images/0');
+          const data = await response.json()
+          const blob = new Blob([Buffer.from(data[0].file.buffer)]);
+          setDisplayImg(URL.createObjectURL(blob))
+        }}>받기</button>
+      </Header>
       <Main>
         <Contents>
           <Title>화면</Title>
+          {displayImg && <Image src={displayImg} alt='display image' width={200} height={200} />}
           <Preview></Preview>
         </Contents>
         <ObjectContent>
@@ -339,13 +351,13 @@ const CombineObj = styled.div`
   background-color: rgb(225, 225, 230);
   padding: 16px 30px;
   margin: 20px -24px;
-  margin-bottom: -8px;
+  margin-bottom: -12px;
 `
 const TitleWrap = styled.div`
   display:flex;
   align-items: center;
   margin-top: 36px;
-  margin-bottom: 24px;
+  margin-bottom: 8px;
   h1{
     font-size: 16px;
     margin-right: 8px;
@@ -410,17 +422,17 @@ const NewObjModalLab = styled.label<{ img: string }>`
   display:flex;
   align-items: center;
   justify-content: center;
-  span{
+  img{
     width:170px;
     height:170px;
     border-radius: 100px;
     background-color: #dadada;
-    background-position: center center;
-    background-repeat: repeat-x;
-    background-size: cover;
-    display:flex;
+    /* background-position: center center; */
+    /* background-repeat: repeat-x; */
+    /* background-size: cover; */
+    /* display:flex; */
     position:absolute;
-    background-image: ${({ img }: { img: string }) => `url(${img})`};
+    /* background-image: ${({ img }: { img: string }) => `url(${img})`}; */
   }
   div{
     width:170px;

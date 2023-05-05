@@ -182,7 +182,8 @@ export default function Play() {
           <DndObject
             style={{
               backgroundImage: `url("${data.objects.find(value => value.id === className)?.img}")`,
-              left: x - 65 / 2, top: y - 65 / 2
+              left: x - 65 / 2,
+              top: y - 65 / 2
             }}
             key={key}
             id={id}

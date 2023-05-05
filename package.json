@@ -18,6 +18,7 @@
   "dependencies": {
     "@next/font": "latest",
     "babel-plugin-styled-components": "latest",
+    "compressorjs": "^1.2.1",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
