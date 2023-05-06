@@ -1,4 +1,4 @@
-## My Custom Next.js Typescirpt
+## Rabotory project
 
 <br>
 
