@@ -4,15 +4,14 @@ import SVG_arrow_right from "../../svg/arrow-right.svg"
 import SVG_cross from "../../svg/cross.svg"
 import SVG_pencil from "../../svg/pencil.svg"
 import { useState, useEffect } from 'react'
-import Compressor from 'compressorjs'
 import { cropImage } from '../../lib/image'
 import Image from 'next/image'
 
-interface IData {
+interface IPostData {
   id: string,
   title: string,
   makerId: string,
-  objects: { id: string, name: string, img: string }[],
+  objects: { id: string, name: string, img: string | FormData }[],
   start: string[],
   combine: string[],
   combinate: string[][],
@@ -20,7 +19,7 @@ interface IData {
   sound: string
 }
 
-const temp: IData = {
+const temp: IPostData = {
   id: "0",
   title: "이상한 실험실",
   makerId: "0",
@@ -56,11 +55,13 @@ const temp: IData = {
 }
 
 export default function Create() {
+  const defaultImg = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506"
   const [datas, setDatas] = useState(temp);
   const [selectObj, setSelectObj] = useState<string>()
   const [newObjModal, setNewObjModal] = useState<"start" | "combine">()
-  const [testImg, setTestImg] = useState("https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506")
-  const [formData, setFormData] = useState<FormData>()
+  const [newObjImgUrl, setNewObjImgUrl] = useState(defaultImg)
+  const [newObjImg, setNewObjImg] = useState<FormData | string>()
+  const [newObjName, setNewObjName] = useState("")
   const [displayImg, setDisplayImg] = useState<string>()
 
   const objImgProps = (data: string) => ({
@@ -77,16 +78,19 @@ export default function Create() {
     setSelectObj(target.id)
   }
 
-  const findObjValueById = (id: string | undefined, value: "img" | "id" | "name") => {
+  const findObjValueById = (id: string | undefined, value: "img" | "id" | "name"): string | undefined => {
     const data = datas.objects.find(value => id === value.id)
     if (!data) return { id: undefined, name: "?", img: undefined }[value]
-    return data[value]
+    const dataInVal = data[value]
+    if (typeof dataInVal === "string") return dataInVal
+    const file = dataInVal.get("file") as File | null
+    if (file) return URL.createObjectURL(file)
   }
 
   const handleCombine = (data: string[], key: number, kind: number, selectObj: string | undefined) => {
     const onClick = () => {
       if (!selectObj) return;
-      const newData: IData = JSON.parse(JSON.stringify(datas))
+      const newData: IPostData = JSON.parse(JSON.stringify(datas))
       newData.combinate[key][kind] = selectObj
       const combinate = newData.combinate[key]
       let isSame = false
@@ -134,8 +138,8 @@ export default function Create() {
                 <h1>새 오브젝트</h1>
                 <SVG_cross onClick={() => { setNewObjModal(undefined) }} width={36} height={36} />
               </NewObjModalHeader>
-              <NewObjModalLab htmlFor="modalInput" img={testImg}>
-                <Image src={testImg} alt="object" width={170} height={170} />
+              <NewObjModalLab htmlFor="modalInput" img={newObjImgUrl}>
+                <Image src={newObjImgUrl} alt="object" width={170} height={170} />
                 <div>
                   <SVG_pencil fill="white" width="60" height="60" />
                 </div>
@@ -149,33 +153,51 @@ export default function Create() {
                   const files = input.files;
                   if (!files) return;
                   const croppedImg = await cropImage(files[0], 360)
-                  setTestImg(URL.createObjectURL(croppedImg))
+                  setNewObjImgUrl(URL.createObjectURL(croppedImg))
                   const newFormData = new FormData();
                   newFormData.append('file', croppedImg);
-                  newFormData.append('data', JSON.stringify({ ownerId: "0" }));
-                  setFormData(newFormData)
+                  setNewObjImg(newFormData)
                 }}
                 style={{ display: "none" }}
               />
-              <input type="text" />
+              <input value={newObjName} onChange={(e) => { setNewObjName(e.target.value) }} type="text" />
+              <button onClick={() => {
+                if (!newObjImg) return;
+                const copyData = { ...datas }
+                const newObject = {
+                  id: String(copyData.objects.length),
+                  name: newObjName,
+                  img: newObjImg
+                }
+                if (newObjModal === "combine") copyData.combine.push(String(copyData.objects.length))
+                else copyData.start.push(String(copyData.objects.length))
+                copyData.objects.push(newObject)
+                setDatas(copyData)
+
+                setNewObjModal(undefined)
+                setNewObjImgUrl(defaultImg)
+                setNewObjImg(undefined)
+              }}>생성</button>
             </NewObjModal>
           </NewObjModalBg>
           : null
       }
       <Header>
-        <button onClick={async () => {
-          const response = await fetch('http://localhost:3000/upload', {
+        {/* <button onClick={async () => {
+          await fetch('http://localhost:3000/upload', {
             method: 'POST',
-            body: formData
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: formData,
           });
-          console.log(response)
         }}>전달</button>
         <button onClick={async () => {
           const response = await fetch('http://localhost:3000/images/0');
           const data = await response.json()
           const blob = new Blob([Buffer.from(data[0].file.buffer)]);
           setDisplayImg(URL.createObjectURL(blob))
-        }}>받기</button>
+        }}>받기</button> */}
       </Header>
       <Main>
         <Contents>
@@ -316,13 +338,13 @@ const Object = styled.div`
   margin-right: 16px;
   h1{
     margin-top: 12px;
-    font-size: 15px;
+    font-size: 14px;
     color:black;
   }
   @media screen and (max-width: 800px) {
     h1{
       margin-top: 8px;
-      font-size: 14px;
+      font-size: 12px;
     }
     margin-bottom: 16px;
   }
@@ -427,12 +449,7 @@ const NewObjModalLab = styled.label<{ img: string }>`
     height:170px;
     border-radius: 100px;
     background-color: #dadada;
-    /* background-position: center center; */
-    /* background-repeat: repeat-x; */
-    /* background-size: cover; */
-    /* display:flex; */
     position:absolute;
-    /* background-image: ${({ img }: { img: string }) => `url(${img})`}; */
   }
   div{
     width:170px;
