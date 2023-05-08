@@ -7,6 +7,7 @@ import { useState, useEffect, ChangeEvent } from 'react'
 import { cropImage } from '../../lib/image'
 import Image from 'next/image'
 import { getCompUID } from '../../lib/randomString'
+import CreateObjModal from "../../components/create/createObjModal"
 
 interface IPostData {
   id: string,
@@ -58,13 +59,9 @@ const temp: IPostData = {
 }
 
 export default function Create() {
-  const defaultImg = "/default.png"
   const [datas, setDatas] = useState(temp);
   const [selectObj, setSelectObj] = useState<string>()
   const [newObjModal, setNewObjModal] = useState<"start" | "combine" | undefined>()
-  const [newObjImgUrl, setNewObjImgUrl] = useState(defaultImg)
-  const [newObjImg, setNewObjImg] = useState<FormData | string>(defaultImg)
-  const [newObjName, setNewObjName] = useState("")
   const [displayImg, setDisplayImg] = useState<string>()
 
   const objImgProps = (data: string) => ({
@@ -109,43 +106,6 @@ export default function Create() {
     setDatas(newData)
     setSelectObj(undefined)
   }
-  const handleFileChange = async (e: ChangeEvent) => {
-    const input = e.target as HTMLInputElement
-    const files = input.files;
-    if (!files) return;
-    const croppedImg = await cropImage(files[0], 360)
-    setNewObjImgUrl(URL.createObjectURL(croppedImg))
-    const newFormData = new FormData();
-    newFormData.append('file', croppedImg);
-    setNewObjImg(newFormData)
-  }
-  const handleCreateObject = () => {
-    if (!newObjImg) return;
-    const newData = { ...datas }
-    const id = getCompUID(8, document)
-    const name = newObjName ? newObjName : "오브젝트"
-    let img: string | { id: string, url: string } | null = typeof newObjImg === "string" ? newObjImg : null
-    if (typeof newObjImg !== "string") {
-      const file = newObjImg.get('file') as File | null
-      if (file) {
-        const url = URL.createObjectURL(file)
-        img = {
-          id: String(newData.imageFile.length),
-          url
-        }
-        newData.imageFile.push(newObjImg)
-      }
-    }
-
-    if (newObjModal === "combine") newData.combine.push(id)
-    else newData.start.push(id)
-    if (img) newData.objects.push({ id, name, img })
-    setDatas(newData)
-
-    setNewObjModal(undefined)
-    setNewObjImgUrl(defaultImg)
-    setNewObjImg(defaultImg)
-  }
 
   return (
     <Container onClick={(e: MouseEvent) => {
@@ -154,49 +114,12 @@ export default function Create() {
     }}>
       {
         newObjModal ?
-          <NewObjModalBg>
-            <NewObjModal>
-              <NewObjModalHeader>
-                <h1>새 오브젝트</h1>
-              </NewObjModalHeader>
-              <NewObjContents>
-                <NewObjImg htmlFor="modalInput" img={newObjImgUrl}>
-                  <Image src={newObjImgUrl} alt="object" width={170} height={170} />
-                  <div>
-                    <SVG_pencil width="60" height="60" />
-                  </div>
-                </NewObjImg>
-                <NewObjListInp>
-                  <NewObjInput>
-                    <h2>이름</h2>
-                    <input
-                      placeholder='오브젝트'
-                      type="text"
-                      value={newObjName}
-                      onChange={(e) => { setNewObjName(e.target.value) }}
-                    />
-                  </NewObjInput>
-                  <NewObjInput>
-                    <h2>이미지</h2>
-                    <label htmlFor="modalInput">
-                      <h1>{newObjImgUrl}</h1>
-                    </label>
-                  </NewObjInput>
-                  <input
-                    type="file"
-                    id="modalInput"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
-                  />
-                  <NewObjBtnWrap>
-                    <button style={{ backgroundColor: "#6084E0" }} onClick={handleCreateObject}>생성</button>
-                    <button style={{ backgroundColor: "#E04F4F" }} onClick={() => { setNewObjModal(undefined) }}>취소</button>
-                  </NewObjBtnWrap>
-                </NewObjListInp>
-              </NewObjContents>
-            </NewObjModal>
-          </NewObjModalBg>
+          <CreateObjModal
+            datas={datas}
+            setDatas={setDatas}
+            modalType={newObjModal}
+            setModal={setNewObjModal}
+          />
           : null
       }
       <Header>
@@ -206,6 +129,14 @@ export default function Create() {
           <Title>화면</Title>
           {displayImg && <Image src={displayImg} alt='display image' width={200} height={200} />}
           <Preview></Preview>
+          <MainInput>
+            <h2>제목</h2>
+            <input type="text" />
+          </MainInput>
+          <MainInput>
+            <h2>제목</h2>
+            <input type="text" />
+          </MainInput>
         </Contents>
         <ObjectContent>
           <TitleWrap>
@@ -343,6 +274,10 @@ const Preview = styled.div`
   margin: 4px;
   background-color: #D9D9D9;
   border-radius: 8px;
+  background: linear-gradient(180deg, rgba(65, 65, 65, 0.75) 0%, rgba(65, 65, 65, 0) 37.62%), url(/defaultBg.jpg);
+  background-position: center center;
+  background-repeat: repeat-x;
+  background-size: cover;
 `
 const ObjectList = styled.div`
   display:flex;
@@ -417,87 +352,21 @@ const TitleWrap = styled.div`
     }
   }
 `
-const NewObjModalBg = styled.div`
-  width:100vw;
-  height:100vh;
-  z-index: 999;
-  background-color: rgba(0,0,0,0.25);
-  backdrop-filter: blur(2.5px);
-  position: fixed;
-  display:flex;
-  align-items: center;
-  justify-content: center;
-`
-const NewObjModal = styled.div`
+const MainInput = styled.div`
   display:flex;
   flex-direction: column;
-  padding: 24px;
-  background-color: #F1F6F9;
-  width:550px;
-  border-radius: 4px;
-`
-const NewObjModalHeader = styled.div`
-  margin-bottom: 32px;
-  display:flex;
-  width:100%;
-  align-items: center;
-  justify-content: space-between;
-  h1{
-    color:#2C2F35;
-    width:100%;
-    font-size: 22px;
-  }
-  svg{
-    cursor:pointer;
-  }
-`
-const NewObjImg = styled.label<{ img: string }>`
-  cursor: pointer;
-  display:flex;
-  width:170px;
-  height:170px;
-  padding:16px;
-  margin-right: 32px;
-  img{
-    width:170px;
-    height:170px;
-    border-radius: 100px;
-    background-color: #dadada;
-  }
-  div{
-    width:170px;
-    height:170px;
-    border-radius: 200px;
-    background-color: rgba(0, 0, 0, 0.25);
-    display:none;
-    align-items: center;
-    justify-content: center;
-    position:absolute;
-  }
-  &:hover{
-    div{
-      display:flex;
-    }
-  }
-`
-const NewObjContents = styled.div`
-  display:flex;
-  flex:1;
-`
-const NewObjInput = styled.div`
-  display:flex;
-  flex-direction: column;
-  margin-bottom: 24px;
+  margin-top: 16px;
+  padding: 16px;
   h2{
-    font-size: 12px;
-    color:#252B30;
+    font-size: 15px;
   }
   input{
     border:none;
     background-color: #dedede;
     border-radius: 4px;
+    width:30%;
     flex:1;
-    margin-top: 6px;
+    margin-top: 10px;
     padding: 12px 16px;
     font-size: 18px;
   }
@@ -513,24 +382,5 @@ const NewObjInput = styled.div`
       font-size: 18px;
       color:#252B30;
     }
-  }
-`
-const NewObjListInp = styled.div`
-  display:flex;
-  flex-direction: column;
-  flex:1;
-`
-const NewObjBtnWrap = styled.div`
-  display:flex;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  button{
-    padding:12px;
-    border: none;
-    border-radius: 4px;
-    margin: 4px;
-    flex: 1;
-    color:white;
-    cursor: pointer;
   }
 `
