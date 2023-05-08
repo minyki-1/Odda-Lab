@@ -23,7 +23,7 @@ export const GlobalStyle = createGlobalStyle`
     user-select: none;
     /* pointer-events: none; */
   }
-  h1,h2,h3,h4,h5 { color: #363636; font-weight:normal; }
+  h1,h2,h3,h4,h5 { color: #363636; font-weight:400; }
   h1 { font-size: 19px; }
   h2 { font-size: 16px; }
   h3 { font-size: 14px; }
@@ -47,17 +47,5 @@ export const GlobalStyle = createGlobalStyle`
   }
   button {
     background-color: initial;
-  }
-  .object{
-    width:65px;
-    height:65px;
-    cursor:grabbing;
-    position: absolute;
-    z-index: 1;
-    border-radius: 100px;
-    background-color: white;
-    background-position: center center;
-    background-repeat: repeat-x;
-    background-size: cover;
   }
 `;

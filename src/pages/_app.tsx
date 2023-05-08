@@ -1,8 +1,8 @@
 import type { AppProps } from 'next/app'
-import { Noto_Sans_KR } from '@next/font/google'
+import { Lato, Noto_Sans_KR } from '@next/font/google'
 import { GlobalStyle } from '../css/globals';
 
-const font = Noto_Sans_KR({
+const font = Lato({
   weight: "400",
   display: "fallback",
   subsets: ["latin"],
