@@ -43,3 +43,37 @@ export async function cropImage(file: File, size: number): Promise<Blob> {
     };
   });
 }
+
+export async function resizeImage(file: File, maxWidth: number, maxHeight: number): Promise<Blob> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = async () => {
+      const img = new Image();
+      img.src = reader.result as string;
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width = width * ratio;
+          height = height * ratio;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        const imageType = file.type.split("/")[1];
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+        }, `image/${imageType}`, 0.8);
+      };
+    };
+  });
+}
+

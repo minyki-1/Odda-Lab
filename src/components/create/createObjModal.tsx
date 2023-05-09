@@ -32,10 +32,12 @@ export default function CreateObjModal({ datas, setDatas, modalType, setModal }:
     const files = input.files;
     if (!files) return;
     const croppedImg = await cropImage(files[0], 360)
-    setNewObjImgUrl(URL.createObjectURL(croppedImg))
+    const url = URL.createObjectURL(croppedImg)
+    setNewObjImgUrl(url)
     const newFormData = new FormData();
     newFormData.append('file', croppedImg);
     setNewObjImg(newFormData)
+    setUrlInputTxt(url)
   }
   const handleCreateObject = () => {
     if (!newObjImg) return;
@@ -95,7 +97,7 @@ export default function CreateObjModal({ datas, setDatas, modalType, setModal }:
           <h1>새 오브젝트</h1>
         </NewObjModalHeader>
         <NewObjContents>
-          <NewObjImg htmlFor="modalInput" img={newObjImgUrl}>
+          <NewObjImg htmlFor="modalInput">
             <NextImage src={newObjImgUrl} alt="object" width={170} height={170} />
             <div>
               <SVG_pencil width="60" height="60" />
@@ -124,7 +126,7 @@ export default function CreateObjModal({ datas, setDatas, modalType, setModal }:
               {
                 imgType === "file" ?
                   <NewObjInputLabel htmlFor="modalInput">
-                    <h1>{newObjImgUrl}</h1>
+                    <h2>{newObjImgUrl}</h2>
                   </NewObjInputLabel>
                   : <input
                     type="text"
@@ -187,7 +189,7 @@ const NewObjModalHeader = styled.div`
     cursor:pointer;
   }
 `
-const NewObjImg = styled.label<{ img: string }>`
+const NewObjImg = styled.label`
   cursor: pointer;
   display:flex;
   width:170px;
@@ -224,6 +226,7 @@ const NewObjInput = styled.div`
   display:flex;
   flex-direction: column;
   margin-bottom: 24px;
+  flex:1;
   div{
     display:flex;
     justify-content: space-between;
@@ -250,7 +253,10 @@ const NewObjInputLabel = styled.label`
   flex:1;
   margin-top: 6px;
   padding: 12px 16px;
-  h1{
+  width:calc(316px - 32px);
+  h2{
+    white-space: nowrap;
+    overflow: hidden;
     font-size: 18px;
     color:#252B30;
   }
@@ -260,11 +266,13 @@ const NewImgOption = styled.div`
   align-items: center;
   input{
     margin:0px;
+    color:#252B30;
   }
   label{
     margin-left: 12px;
     padding-right: 2px;
     font-size: 12px;
+    color:#252B30;
   }
 `
 const NewObjListInp = styled.div`
