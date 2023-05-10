@@ -1,26 +1,11 @@
 import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_arrow_right from "../../svg/arrow-right.svg"
-import SVG_cross from "../../svg/cross.svg"
-import SVG_pencil from "../../svg/pencil.svg"
-import { useState, useEffect, ChangeEvent } from 'react'
-import { cropImage } from '../../lib/image'
-import Image from 'next/image'
-import { getCompUID } from '../../lib/randomString'
+import { ChangeEvent, useState } from 'react'
+import NextImage from 'next/image'
 import CreateObjModal from "../../components/create/createObjModal"
-
-interface IPostData {
-  id: string,
-  title: string,
-  makerId: string,
-  objects: { id: string, name: string, img: string | { id: string, url: string } }[],
-  imageFile: FormData[],
-  start: string[],
-  combine: string[],
-  combinate: string[][],
-  background: string,
-  sound: string
-}
+import { cropImage, resizeImage } from '../../lib/image'
+import { IPostData } from '../../types/data'
 
 const temp: IPostData = {
   id: "0",
@@ -54,6 +39,7 @@ const temp: IPostData = {
   combinate: [
     ["a0", "a1", "a2"]
   ],
+  endObj: ["a3"],
   background: "/image.jpg",
   sound: "url"
 }
@@ -62,20 +48,28 @@ export default function Create() {
   const [datas, setDatas] = useState(temp);
   const [selectObj, setSelectObj] = useState<string>()
   const [newObjModal, setNewObjModal] = useState<"start" | "combine" | undefined>()
-  const [displayImg, setDisplayImg] = useState<string>()
+
+  const defaultImg = "/defaultBg.jpg"
+  const [bgImgURL, setBgImgURL] = useState(defaultImg)
+  const [bgImgData, setBgImgData] = useState<FormData | string>(defaultImg)
+  const [bgURLInput, setBgURLInput] = useState("")
+  const [bgImgType, setBgImgType] = useState<"file" | "url">("file")
 
   const objImgProps = (data: string) => ({
     id: data,
     onClick: handleOnClick,
     size: selectObj === data ? "65" : "55",
-    // style: { boxShadow: selectObj === data ? "0px 0px 12px 6px rgba(255, 255, 255, 0.7)" : "" },
     border: selectObj === data ? "2px solid white" : "",
     img: findObjValueById(data, "img") ?? "",
   })
 
   const handleOnClick = (e: MouseEvent) => {
     const target = e.target as HTMLElement
-    setSelectObj(target.id)
+    if (target.id !== selectObj) {
+      setSelectObj(target.id);
+      return;
+    }
+
   }
 
   const findObjValueById = (id: string | undefined, value: "img" | "id" | "name"): string | undefined => {
@@ -106,6 +100,41 @@ export default function Create() {
     setDatas(newData)
     setSelectObj(undefined)
   }
+  function checkImageUrl(url: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.src = url;
+      img.onload = () => {
+        resolve(true);
+      };
+      img.onerror = () => {
+        resolve(false);
+      };
+    });
+  }
+  const handleChangeUrl = async (url: string) => {
+    const result = await checkImageUrl(url)
+    if (result) {
+      setBgImgURL(url);
+      setBgImgData(url);
+    } else {
+      setBgURLInput("");
+      setBgImgURL(defaultImg);
+      setBgImgData(defaultImg);
+    };
+  };
+  const handleFileChange = async (e: ChangeEvent) => {
+    const input = e.target as HTMLInputElement
+    const files = input.files;
+    if (!files) return;
+    const resizedImg = await resizeImage(files[0], 2400, 1500)
+    const url = URL.createObjectURL(resizedImg)
+    setBgImgURL(url)
+    const newFormData = new FormData();
+    newFormData.append('file', resizedImg);
+    setBgImgData(newFormData)
+    setBgURLInput(url);
+  }
 
   return (
     <Container onClick={(e: MouseEvent) => {
@@ -127,16 +156,46 @@ export default function Create() {
       <Main>
         <Contents>
           <Title>화면</Title>
-          {displayImg && <Image src={displayImg} alt='display image' width={200} height={200} />}
-          <Preview></Preview>
-          <MainInput>
-            <h2>제목</h2>
-            <input type="text" />
-          </MainInput>
-          <MainInput>
-            <h2>제목</h2>
-            <input type="text" />
-          </MainInput>
+          <Preview img={bgImgURL} />
+          <MainInputWrap>
+            <MainInput>
+              <h2>제목</h2>
+              <input type="text" value={datas.title} onChange={(e) => {
+                setDatas({ ...datas, title: e.target.value })
+              }} />
+            </MainInput>
+            <MainInput>
+              <div>
+                <h2>배경 이미지</h2>
+                <NewImgOption>
+                  <label htmlFor="optionFile">FILE</label>
+                  <input checked={bgImgType === "file"} onChange={() => setBgImgType("file")} id={"optionFile"} type="radio" />
+                  <label htmlFor="optionURL">URL</label>
+                  <input checked={bgImgType === "url"} onChange={() => setBgImgType("url")} id={"optionURL"} type="radio" />
+                </NewImgOption>
+              </div>
+              {
+                bgImgType === "file" ?
+                  <MainInputLabel htmlFor="modalInput">
+                    <h1>{bgImgURL}</h1>
+                  </MainInputLabel>
+                  : <input
+                    type="text"
+                    value={bgURLInput}
+                    onChange={(e) => setBgURLInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" ? handleChangeUrl((e.target as HTMLInputElement).value) : null}
+                    onBlur={(e) => { handleChangeUrl(e.target.value) }}
+                  />
+              }
+              <input
+                type="file"
+                id="modalInput"
+                accept="image/*"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </MainInput>
+          </MainInputWrap>
         </Contents>
         <ObjectContent>
           <TitleWrap>
@@ -150,7 +209,8 @@ export default function Create() {
               datas.start.map((data, key) => (
                 <Object key={key}>
                   <ObjectImg {...objImgProps(data)} />
-                  <h1>{findObjValueById(data, "name")}</h1>
+                  {/* <textarea value={"가나다라마바사"} /> */}
+                  <h1 contentEditable={"true"} suppressContentEditableWarning={true} onChange={() => { console.log("s") }}>{findObjValueById(data, "name")}</h1>
                 </Object>
               ))
             }
@@ -225,12 +285,6 @@ const Container = styled.div`
   min-height:100vh;
   display:flex;
   flex-direction: column;
-  h1,h2,h3,h4,h5,h6{
-    color:#F1F6F9;
-  }
-  svg{
-    fill:#F1F6F9;
-  }
 `
 const Header = styled.div`
   width:100%;
@@ -241,6 +295,12 @@ const Main = styled.div`
   display:flex;
   width:100%;
   flex:1;
+  h1,h2,h3,h4,h5,h6,input{
+    color:#F1F6F9;
+  }
+  svg{
+    fill:#F1F6F9;
+  }
 `
 const Contents = styled.div`
   flex:1;
@@ -269,12 +329,12 @@ const Title = styled.h1`
   margin-top: 36px;
   margin-bottom: 24px;
 `
-const Preview = styled.div`
+const Preview = styled.div<{ img: string }>`
   aspect-ratio:16 / 9;
   margin: 4px;
   background-color: #D9D9D9;
   border-radius: 8px;
-  background: linear-gradient(180deg, rgba(65, 65, 65, 0.75) 0%, rgba(65, 65, 65, 0) 37.62%), url(/defaultBg.jpg);
+  background:${({ img }: { img: string }) => `url(${img})`};
   background-position: center center;
   background-repeat: repeat-x;
   background-size: cover;
@@ -292,9 +352,15 @@ const Object = styled.div`
   margin-bottom: 16px;
   margin-left: 16px;
   margin-right: 16px;
-  h1{
+  input,h1{
+    text-align: center;
+    width:50px;
+    height:39px;
     margin-top: 12px;
     font-size: 15px;
+    margin-bottom: -18px;
+    /* text-overflow: ellipsis; */
+    /* overflow: hidden; */
   }
   @media screen and (max-width: 800px) {
     h1{
@@ -357,30 +423,59 @@ const MainInput = styled.div`
   flex-direction: column;
   margin-top: 16px;
   padding: 16px;
+  flex:1;
+  div{
+    display:flex;
+    justify-content: space-between;
+  }
   h2{
     font-size: 15px;
+    margin-right: 8px;
   }
   input{
     border:none;
-    background-color: #dedede;
+    background-color: #545c6b;
+    color:white;
     border-radius: 4px;
-    width:30%;
     flex:1;
     margin-top: 10px;
     padding: 12px 16px;
     font-size: 18px;
   }
-  label{
-    border:none;
-    background-color: #dedede;
-    border-radius: 4px;
-    flex:1;
-    margin-top: 6px;
-    padding: 12px 16px;
+`
+const MainInputLabel = styled.label`
+  border:none;
+  background-color: #545c6b;
+  border-radius: 4px;
+  flex:1;
+  margin-top: 10px;
+  padding: 14px 16px;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  h1{
     font-size: 18px;
-    h1{
-      font-size: 18px;
-      color:#252B30;
-    }
+    height:18px;
+    overflow: hidden;
+  }
+`
+const NewImgOption = styled.div`
+  display:flex;
+  align-items: center;
+  input{
+    margin:0px;
+  }
+  label{
+    margin-left: 12px;
+    padding-right: 2px;
+    font-size: 12px;
+    color:#F1F6F9;
+  }
+`
+const MainInputWrap = styled.div`
+  display:flex;
+  justify-content: space-between;
+  @media screen and (max-width: 1200px) {
+    flex-direction: column;
   }
 `
