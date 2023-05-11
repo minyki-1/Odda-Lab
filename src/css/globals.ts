@@ -21,7 +21,6 @@ export const GlobalStyle = createGlobalStyle`
   }
   *{
     user-select: none;
-    /* pointer-events: none; */
   }
   h1,h2,h3,h4,h5 { color: #363636; font-weight:400; }
   h1 { font-size: 19px; }
