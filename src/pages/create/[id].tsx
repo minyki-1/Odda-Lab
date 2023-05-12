@@ -2,10 +2,11 @@ import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_arrow_right from "../../svg/arrow-right.svg"
 import { ChangeEvent, useState } from 'react'
-import NextImage from 'next/image'
 import CreateObjModal from "../../components/create/createObjModal"
-import { cropImage, resizeImage } from '../../lib/image'
+import { resizeImage } from '../../lib/image'
 import { IPostData } from '../../types/data'
+import SVG_Home from "../../svg/home.svg"
+import Link from "next/link"
 
 const temp: IPostData = {
   id: "0",
@@ -69,7 +70,6 @@ export default function Create() {
       setSelectObj(target.id);
       return;
     }
-
   }
 
   const findObjValueById = (id: string | undefined, value: "img" | "id" | "name"): string | undefined => {
@@ -104,12 +104,8 @@ export default function Create() {
     return new Promise((resolve) => {
       const img = new Image();
       img.src = url;
-      img.onload = () => {
-        resolve(true);
-      };
-      img.onerror = () => {
-        resolve(false);
-      };
+      img.onload = () => resolve(true)
+      img.onerror = () => resolve(false)
     });
   }
   const handleChangeUrl = async (url: string) => {
@@ -152,6 +148,8 @@ export default function Create() {
           : null
       }
       <Header>
+        <Link href="/"><SVG_Home /></Link>
+        <h1>새 라보토리 생성</h1>
       </Header>
       <Main>
         <Contents>
@@ -195,6 +193,7 @@ export default function Create() {
                 style={{ display: "none" }}
               />
             </MainInput>
+            {/* TODO: 오디오 파일 받기 */}
           </MainInputWrap>
         </Contents>
         <ObjectContent>
@@ -209,7 +208,6 @@ export default function Create() {
               datas.start.map((data, key) => (
                 <Object key={key}>
                   <ObjectImg {...objImgProps(data)} />
-                  {/* <textarea value={"가나다라마바사"} /> */}
                   <h1 contentEditable={"true"} suppressContentEditableWarning={true} onChange={() => { console.log("s") }}>{findObjValueById(data, "name")}</h1>
                 </Object>
               ))
@@ -289,7 +287,27 @@ const Container = styled.div`
 const Header = styled.div`
   width:100%;
   height:48px;
-  background-color: #D9D9D9;
+  background-color: #1D2334;
+  display:flex;
+  align-items: center;
+  svg{
+    width:22px;
+    height:22px;
+    fill:#F1F6F9;
+    margin:0px 12px;
+    padding: 2px;
+    opacity: 0.7;
+    cursor: pointer;
+    &:hover{
+      opacity: 1;
+    }
+  }
+  h1{
+    font-size: 18px;
+    color:#F1F6F9;
+    margin-left: 4px;
+    opacity: 0.9;
+  }
 `
 const Main = styled.div`
   display:flex;
