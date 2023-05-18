@@ -1,36 +1,47 @@
 import styled from 'styled-components'
 import SVG_search from "../svg/search.svg"
+import Link from "next/link"
 import SVG_heart_fill from "../svg/heart-fill.svg"
 const tempObjURL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506"
+const tempData = [
+  { id: "0", title: "테스트 실험실1", backgroundImage: "/image.jpg", object: [tempObjURL, tempObjURL, tempObjURL] },
+  { id: "1", title: "테스트 실험실2", backgroundImage: "/image.jpg", object: [tempObjURL, tempObjURL, tempObjURL] }
+]
 
 export default function Home() {
   return (
     <Container>
       <Header></Header>
       <SortWrapper>
-        <SortList>
-          <h1>Popular</h1>
-          <h1>Newest</h1>
-          <h1>Workspace</h1>
-        </SortList>
+        <div>
+          <SortTitle select={"true"}>Popular</SortTitle>
+          <SortTitle >Newest</SortTitle>
+          <SortTitle >Workspace</SortTitle>
+        </div>
         <Search>
           <input type="text" />
           <SVG_search fill="#F1F6F9" width={24} height={24} />
         </Search>
       </SortWrapper>
       <RabotoryList>
-        <Rabotory>
-          <RabImg>
-            <div style={{ backgroundImage: `url(${tempObjURL})` }}></div>
-          </RabImg>
-          <RabTitle>테스트 실험실</RabTitle>
-          <RabInfo>
-            <SVG_heart_fill width={18} height={18} />
-            <h2>20</h2>
-            <SVG_heart_fill width={18} height={18} />
-            <h2>20</h2>
-          </RabInfo>
-        </Rabotory>
+        {
+          tempData.map((data, key) => (
+            <Rabotory href={`/play/${data.id}`} key={key}>
+              <RabImg>
+                <div style={{ backgroundImage: `url(${data.object[0]})` }}></div>
+                <div style={{ backgroundImage: `url(${data.object[1]})` }}></div>
+                <div style={{ backgroundImage: `url(${data.object[2]})` }}></div>
+              </RabImg>
+              <RabTitle>{data.title}</RabTitle>
+              <RabInfo>
+                <SVG_heart_fill width={18} height={18} />
+                <h2>20</h2>
+                <SVG_heart_fill width={18} height={18} />
+                <h2>20</h2>
+              </RabInfo>
+            </Rabotory>
+          ))
+        }
       </RabotoryList>
     </Container>
   )
@@ -59,14 +70,18 @@ const SortWrapper = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 24px 40px;
+  div{
+    display: flex;
+  }
 `
-const SortList = styled.div`
-  display:flex;
-  h1{
-    font-size: 20px;
-    padding: 2px;
-    margin-right:18px;
-    cursor: pointer;
+const SortTitle = styled.h1<{ select: string }>`
+  font-size: 20px;
+  padding: 2px;
+  margin-right:18px;
+  cursor: pointer;
+  opacity: ${({ select }: { select: string }) => select === "true" ? 1 : 0.6};
+  &:hover{
+    opacity:1;
   }
 `
 const Search = styled.div`
@@ -89,7 +104,7 @@ const RabotoryList = styled.div`
   flex-wrap: wrap;
   flex: 1;
 `
-const Rabotory = styled.div`
+const Rabotory = styled(Link)`
   display:flex;
   flex-direction: column;
   margin-left: 40px;
@@ -101,7 +116,7 @@ const Rabotory = styled.div`
   box-shadow: 0px 0px 12px 6px rgba(0,0,0,0.2);
 `
 const RabImg = styled.div`
-  width:100%;
+  width:calc(100% - 24px);
   aspect-ratio: 16 / 9;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(/image.jpg);
   background-position: center center;
@@ -109,8 +124,9 @@ const RabImg = styled.div`
   background-size: cover;
   display:flex;
   align-items: center;
-  justify-content: space-around;
+  justify-content: space-evenly;
   border-radius: 8px;
+  padding: 0px 12px;
   div{
     width:80px;
     height:80px;
@@ -125,7 +141,7 @@ const RabImg = styled.div`
   }
 `
 const RabTitle = styled.h1`
-  padding: 18px;
+  padding: 16px;
   font-size: 22px;
 `
 const RabInfo = styled.div`
