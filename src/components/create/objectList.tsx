@@ -61,6 +61,7 @@ const TitleWrap = styled.div`
   margin-top: 36px;
   margin-bottom: 8px;
   h1{
+    color:#F1F6F9;
     font-size: 18px;
     margin-right: 8px;
   }
@@ -91,6 +92,7 @@ const Object = styled.div`
   margin-left: 16px;
   margin-right: 16px;
   input,h1{
+    color:#F1F6F9;
     text-align: center;
     width:50px;
     height:39px;

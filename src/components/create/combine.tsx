@@ -53,7 +53,7 @@ export default function Combine() {
               />
               <h1>{findData(data[0], "name")}</h1>
             </Object>
-            <SVG_plus width="32" height="32" />
+            <SVG_plus width="32" height="32" fill="#F1F6F9" />
             <Object>
               <ObjectImg
                 onClick={() => { handleCombine(key, 1) }}
@@ -62,7 +62,7 @@ export default function Combine() {
               />
               <h1>{findData(data[1], "name")}</h1>
             </Object>
-            <SVG_arrow_right width="32" height="32" />
+            <SVG_arrow_right width="32" height="32" fill="#F1F6F9" />
             <Object>
               <ObjectImg
                 onClick={() => { handleCombine(key, 2) }}
@@ -84,6 +84,7 @@ const TitleWrap = styled.div`
   margin-top: 36px;
   margin-bottom: 8px;
   h1{
+    color:#F1F6F9;
     font-size: 18px;
     margin-right: 8px;
   }
@@ -119,6 +120,7 @@ const Object = styled.div`
   margin-left: 16px;
   margin-right: 16px;
   input,h1{
+    color:#F1F6F9;
     text-align: center;
     width:50px;
     height:39px;

@@ -121,7 +121,8 @@ const Header = styled.div`
     width:22px;
     height:22px;
     fill:#F1F6F9;
-    margin:0px 12px;
+    margin-left: 28px;
+    margin-right: 8px;
     padding: 2px;
     opacity: 0.7;
     cursor: pointer;
@@ -140,12 +141,6 @@ const Main = styled.div`
   display:flex;
   width:100%;
   flex:1;
-  h1,h2,h3,h4,h5,h6,input{
-    color:#F1F6F9;
-  }
-  svg{
-    fill:#F1F6F9;
-  }
 `
 const Contents = styled.div`
   flex:1;
@@ -173,6 +168,7 @@ const Title = styled.h1`
   font-size: 20px;
   margin-top: 36px;
   margin-bottom: 24px;
+  color:#F1F6F9;
 `
 const Preview = styled.div<{ img: string }>`
   aspect-ratio:16 / 9;
@@ -184,64 +180,24 @@ const Preview = styled.div<{ img: string }>`
   background-repeat: repeat-x;
   background-size: cover;
 `
-const Object = styled.div`
-  display:flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 16px;
-  margin-bottom: 16px;
-  margin-left: 16px;
-  margin-right: 16px;
-  input,h1{
-    text-align: center;
-    width:50px;
-    height:39px;
-    margin-top: 12px;
-    font-size: 15px;
-    margin-bottom: -18px;
-  }
-  @media screen and (max-width: 800px) {
-    h1{
-      margin-top: 8px;
-      font-size: 12px;
-    }
-    margin-bottom: 16px;
-  }
-`
-const ObjectImg = styled.div<{ size: string, img: string, shadow: string, border: string }>`
-  width:${({ size }: { size: string }) => size + "px"};
-  height:${({ size }: { size: string }) => size + "px"};
-  background-image: ${({ img }: { img: string }) => `url(${img})`};
-  box-shadow:${({ shadow }: { shadow: string }) => shadow};
-  border:${({ border }: { border: string }) => border};
-  cursor: grab;
-  border-radius: 100px;
-  background-color: white;
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: cover;
-  @media screen and (max-width: 800px) {
-    width:50px;
-    height:50px;
-  }
-`
-
 const MainInput = styled.div`
   display:flex;
   flex-direction: column;
   margin-top: 16px;
   padding: 16px;
   flex:1;
+  overflow: hidden;
   div{
     display:flex;
     justify-content: space-between;
   }
   h2{
+    color:#F1F6F9;
     font-size: 15px;
     margin-right: 8px;
   }
   input{
+    color:#F1F6F9;
     border:none;
     background-color: #545c6b;
     color:white;
@@ -263,6 +219,7 @@ const MainInputLabel = styled.label`
     display: none;
   }
   h1{
+    color:#F1F6F9;
     font-size: 18px;
     height:18px;
     overflow: hidden;

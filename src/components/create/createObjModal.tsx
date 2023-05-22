@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import SVG_pencil from "../../svg/pencil.svg"
 import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { cropImage } from '../../lib/image'
+import { checkImageURL, cropImage } from '../../lib/image'
 import { getCompUID } from '../../lib/randomString'
 import NextImage from 'next/image'
 import { useStore } from '../../zustand/store'
@@ -54,20 +54,8 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
     setNewObjImgUrl(defaultImg)
     setNewObjImg(defaultImg)
   }
-  function checkImageUrl(url: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => {
-        resolve(true);
-      };
-      img.onerror = () => {
-        resolve(false);
-      };
-    });
-  }
   const handleChangeUrl = async (url: string) => {
-    const result = await checkImageUrl(url)
+    const result = await checkImageURL(url)
     if (result) {
       setNewObjImgUrl(url);
       setNewObjImg(url);
@@ -85,7 +73,7 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
           <h1>새 오브젝트</h1>
         </NewObjModalHeader>
         <NewObjContents>
-          <NewObjImg htmlFor="modalInput">
+          <NewObjImg htmlFor="newModalInput">
             <NextImage src={newObjImgUrl} alt="object" width={170} height={170} />
             <div>
               <SVG_pencil fill="white" width="60" height="60" />
@@ -105,15 +93,15 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
               <div>
                 <h2>이미지</h2>
                 <NewImgOption>
-                  <label htmlFor="optionFile">FILE</label>
-                  <input checked={imgType === "file"} onChange={() => setImgType("file")} id={"optionFile"} type="radio" />
-                  <label htmlFor="optionURL">URL</label>
-                  <input checked={imgType === "url"} onChange={() => setImgType("url")} id={"optionURL"} type="radio" />
+                  <label htmlFor="newOptionFile">FILE</label>
+                  <input checked={imgType === "file"} onChange={() => setImgType("file")} id={"newOptionFile"} type="radio" />
+                  <label htmlFor="newOptionURL">URL</label>
+                  <input checked={imgType === "url"} onChange={() => setImgType("url")} id={"newOptionURL"} type="radio" />
                 </NewImgOption>
               </div>
               {
                 imgType === "file" ?
-                  <NewObjInputLabel htmlFor="modalInput">
+                  <NewObjInputLabel htmlFor="newModalInput">
                     <h2>{newObjImgUrl}</h2>
                   </NewObjInputLabel>
                   : <input
@@ -127,7 +115,7 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
             </NewObjInput>
             <input
               type="file"
-              id="modalInput"
+              id="newModalInput"
               accept="image/*"
               onChange={handleFileChange}
               style={{ display: "none" }}
@@ -160,7 +148,7 @@ const NewObjModalWrap = styled.div`
   display:flex;
   flex-direction: column;
   padding: 24px;
-  background-color: #F1F6F9;
+  background-color: #141821;
   width:550px;
   border-radius: 4px;
 `
@@ -171,7 +159,7 @@ const NewObjModalHeader = styled.div`
   align-items: center;
   justify-content: space-between;
   h1{
-    color:#2C2F35;
+    color:#F1F6F9;
     width:100%;
     font-size: 22px;
   }
@@ -222,14 +210,14 @@ const NewObjInput = styled.div`
     justify-content: space-between;
   }
   h2{
-    font-size: 12px;
-    color:#252B30;
+    font-size: 12px;    
+    color:#F1F6F9;
     margin-right: 8px;
   }
   input{
     border:none;
-    color:#2C2F35;
-    background-color: #dedede;
+    color:#F1F6F9;
+    background-color: #343943;
     border-radius: 4px;
     flex:1;
     margin-top: 6px;
@@ -239,7 +227,7 @@ const NewObjInput = styled.div`
 `
 const NewObjInputLabel = styled.label`
   border:none;
-  background-color: #dedede;
+  background-color: #343943;
   border-radius: 4px;
   flex:1;
   margin-top: 6px;
@@ -250,7 +238,7 @@ const NewObjInputLabel = styled.label`
     white-space: nowrap;
     overflow: hidden;
     font-size: 18px;
-    color:#252B30;
+    color:#F1F6F9;
   }
 `
 const NewImgOption = styled.div`
@@ -258,13 +246,13 @@ const NewImgOption = styled.div`
   align-items: center;
   input{
     margin:0px;
-    color:#252B30;
+    color:#F1F6F9;
   }
   label{
     margin-left: 12px;
     padding-right: 2px;
     font-size: 12px;
-    color:#252B30;
+    color:#F1F6F9;
   }
 `
 const NewObjListInp = styled.div`
