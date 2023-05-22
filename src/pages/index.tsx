@@ -34,9 +34,9 @@ export default function Home() {
               </RabImg>
               <RabTitle>{data.title}</RabTitle>
               <RabInfo>
-                <SVG_heart_fill width={18} height={18} />
+                <SVG_heart_fill width={16} height={16} />
                 <h2>20</h2>
-                <SVG_heart_fill width={18} height={18} />
+                <SVG_heart_fill width={16} height={16} />
                 <h2>20</h2>
               </RabInfo>
             </Rabotory>
@@ -116,7 +116,7 @@ const Rabotory = styled(Link)`
   box-shadow: 0px 0px 12px 6px rgba(0,0,0,0.2);
 `
 const RabImg = styled.div`
-  width:calc(100% - 24px);
+  width:100%;
   aspect-ratio: 16 / 9;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(/image.jpg);
   background-position: center center;
@@ -124,16 +124,16 @@ const RabImg = styled.div`
   background-size: cover;
   display:flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
   border-radius: 8px;
-  padding: 0px 12px;
   div{
-    width:80px;
-    height:80px;
+    width:70px;
+    height:70px;
     border-radius: 100px;
     background-position: center center;
     background-repeat: repeat-x;
     background-size: cover;
+    margin: 20px;
     @media screen and (max-width: 800px) {
       width:50px;
       height:50px;
@@ -142,7 +142,7 @@ const RabImg = styled.div`
 `
 const RabTitle = styled.h1`
   padding: 16px;
-  font-size: 22px;
+  font-size: 20px;
 `
 const RabInfo = styled.div`
   padding: 18px;
@@ -150,11 +150,11 @@ const RabInfo = styled.div`
   display:flex;
   align-items: center;
   h2{
-    font-size: 18px;
-    margin-left: 6px;
+    font-size: 17px;
+    margin-left: 4px;
     margin-right: 20px;
   }
   svg{
-    padding:2px;
+    padding:4px;
   }
 `

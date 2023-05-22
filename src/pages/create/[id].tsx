@@ -3,7 +3,7 @@ import SVG_plus from "../../svg/plus.svg"
 import SVG_arrow_right from "../../svg/arrow-right.svg"
 import { ChangeEvent, useState } from 'react'
 import CreateObjModal from "../../components/create/createObjModal"
-import { resizeImage } from '../../lib/image'
+import { resizeImage, checkImageURL } from '../../lib/image'
 import { IPostData } from '../../types/data'
 import SVG_Home from "../../svg/home.svg"
 import Link from "next/link"
@@ -100,16 +100,8 @@ export default function Create() {
     setDatas(newData)
     setSelectObj(undefined)
   }
-  function checkImageUrl(url: string): Promise<boolean> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.src = url;
-      img.onload = () => resolve(true)
-      img.onerror = () => resolve(false)
-    });
-  }
   const handleChangeUrl = async (url: string) => {
-    const result = await checkImageUrl(url)
+    const result = await checkImageURL(url)
     if (result) {
       setBgImgURL(url);
       setBgImgData(url);
@@ -377,8 +369,6 @@ const Object = styled.div`
     margin-top: 12px;
     font-size: 15px;
     margin-bottom: -18px;
-    /* text-overflow: ellipsis; */
-    /* overflow: hidden; */
   }
   @media screen and (max-width: 800px) {
     h1{
