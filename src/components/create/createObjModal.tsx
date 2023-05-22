@@ -1,19 +1,19 @@
 import styled from 'styled-components'
 import SVG_pencil from "../../svg/pencil.svg"
-import { useState, useEffect, ChangeEvent, Dispatch, SetStateAction } from 'react'
+import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { cropImage } from '../../lib/image'
 import { getCompUID } from '../../lib/randomString'
 import NextImage from 'next/image'
-import { IPostData } from '../../types/data'
+import { useStore } from '../../zustand/store'
 
-
-export default function CreateObjModal({ datas, setDatas, modalType, setModal }: { datas: IPostData, setDatas: Dispatch<SetStateAction<IPostData>>, modalType: "start" | "combine" | undefined, setModal: Dispatch<SetStateAction<"start" | "combine" | undefined>> }) {
+export default function CreateObjModal({ modalType, setModal }: { modalType: "start" | "combine" | undefined, setModal: Dispatch<SetStateAction<"start" | "combine" | undefined>> }) {
   const defaultImg = "/defaultObj.png"
   const [newObjImgUrl, setNewObjImgUrl] = useState(defaultImg)
   const [newObjImg, setNewObjImg] = useState<FormData | string>(defaultImg)
   const [urlInputTxt, setUrlInputTxt] = useState("")
   const [newObjName, setNewObjName] = useState("")
   const [imgType, setImgType] = useState<"file" | "url">("file")
+  const { contentData, setContentData } = useStore()
 
   const handleFileChange = async (e: ChangeEvent) => {
     const input = e.target as HTMLInputElement
@@ -28,8 +28,8 @@ export default function CreateObjModal({ datas, setDatas, modalType, setModal }:
     setUrlInputTxt(url)
   }
   const handleCreateObject = () => {
-    if (!newObjImg) return;
-    const newData = { ...datas }
+    if (!newObjImg || !contentData) return;
+    const newData = { ...contentData }
     const id = getCompUID(8, document)
     const name = newObjName ? newObjName : "오브젝트"
     let img: string | { id: string, url: string } | null = typeof newObjImg === "string" ? newObjImg : null
@@ -48,7 +48,7 @@ export default function CreateObjModal({ datas, setDatas, modalType, setModal }:
     if (modalType === "combine") newData.combine.push(id)
     else newData.start.push(id)
     if (img) newData.objects.push({ id, name, img })
-    setDatas(newData)
+    setContentData(newData)
 
     setModal(undefined)
     setNewObjImgUrl(defaultImg)
@@ -153,6 +153,8 @@ const NewObjModalBg = styled.div`
   display:flex;
   align-items: center;
   justify-content: center;
+  top:0px;
+  left:0px;
 `
 const NewObjModalWrap = styled.div`
   display:flex;
@@ -226,6 +228,7 @@ const NewObjInput = styled.div`
   }
   input{
     border:none;
+    color:#2C2F35;
     background-color: #dedede;
     border-radius: 4px;
     flex:1;

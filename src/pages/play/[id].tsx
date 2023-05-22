@@ -6,6 +6,7 @@ import { getCompUID } from '../../lib/randomString'
 import DndObj from '../../components/play/dndObj'
 import { getLocate, useDndObj } from '../../lib/dnd'
 import { useStore } from '../../zustand/store'
+import { TDnds } from '../../types/dnd'
 
 type TDndEvent = PointerEvent | TouchEvent
 
@@ -48,7 +49,7 @@ export default function Play() {
   const { setSelectObj } = useStore()
   const { handleDndDrop, handleMove } = useDndObj();
   const objectList = useRef<HTMLElement>(null);
-  const [dndObjs, setDndObjs] = useState<{ id: string, className: string, x: number, y: number, img: string }[]>([])
+  const [dndObjs, setDndObjs] = useState<TDnds>([])
   const data = temp;
 
   const makeHandleDnd = (e: TDndEvent) => {

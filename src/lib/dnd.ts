@@ -1,3 +1,4 @@
+import { IPostData } from "../types/data";
 import { TDndEvent } from "../types/dnd";
 import { useStore } from "../zustand/store";
 const objSize = 70
@@ -54,4 +55,16 @@ export const useDndObj = () => {
     }
   }
   return { handleDndDrop, handleMove, handleDndGrap, handleDndObj }
+}
+
+export const useFindDataById = () => {
+  const { contentData } = useStore()
+  const get = (id: string | undefined, value: "img" | "id" | "name") => {
+    const data = contentData.objects.find(value => id === value.id)
+    if (!data) return { id: undefined, name: "?", img: undefined }[value]
+    const dataInVal = data[value]
+    if (typeof dataInVal === "string") return dataInVal
+    return dataInVal.url
+  }
+  return get
 }

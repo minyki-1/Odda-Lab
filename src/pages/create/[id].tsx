@@ -1,54 +1,14 @@
 import styled from 'styled-components'
-import SVG_plus from "../../svg/plus.svg"
-import SVG_arrow_right from "../../svg/arrow-right.svg"
 import { ChangeEvent, useState } from 'react'
-import CreateObjModal from "../../components/create/createObjModal"
 import { resizeImage, checkImageURL } from '../../lib/image'
-import { IPostData } from '../../types/data'
 import SVG_Home from "../../svg/home.svg"
 import Link from "next/link"
-
-const temp: IPostData = {
-  id: "0",
-  title: "이상한 실험실",
-  makerId: "0",
-  objects: [
-    {
-      id: "a0",
-      name: "물",
-      img: "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506"
-    },
-    {
-      id: "a1",
-      name: "불",
-      img: "https://media.istockphoto.com/id/1323529010/ko/%EB%B2%A1%ED%84%B0/%EC%A0%88%EC%97%B0%EB%90%9C-%ED%99%94%EC%9E%AC-%EB%B2%A1%ED%84%B0.jpg?s=612x612&w=0&k=20&c=W5Vw8QImatJTlzwtBYj48aglJrOZuv0YP-tZ6TStqnc="
-    },
-    {
-      id: "a2",
-      name: "수증기",
-      img: "https://previews.123rf.com/images/rigamondis/rigamondis1111/rigamondis111100015/11317989-%EC%95%84%EC%9D%B4%EC%8A%AC%EB%9E%80%EB%93%9C%EC%9D%98-%ED%95%98%EB%8A%98%EB%A1%9C-%EC%8A%A4%ED%8C%80%EA%B3%BC-%EC%88%98%EC%A6%9D%EA%B8%B0%EA%B0%80%EC%9E%88%EB%8A%94-%ED%81%B0-%EC%86%94%ED%8C%8C-%ED%83%80%EB%9D%BC.jpg"
-    },
-    {
-      id: "a3",
-      name: "숨겨진 요소",
-      img: "https://previews.123rf.com/images/rigamondis/rigamondis1111/rigamondis111100015/11317989-%EC%95%84%EC%9D%B4%EC%8A%AC%EB%9E%80%EB%93%9C%EC%9D%98-%ED%95%98%EB%8A%98%EB%A1%9C-%EC%8A%A4%ED%8C%80%EA%B3%BC-%EC%88%98%EC%A6%9D%EA%B8%B0%EA%B0%80%EC%9E%88%EB%8A%94-%ED%81%B0-%EC%86%94%ED%8C%8C-%ED%83%80%EB%9D%BC.jpg"
-    }
-  ],
-  imageFile: [],
-  start: ["a0", "a1"],
-  combine: ["a2", "a3"],
-  combinate: [
-    ["a0", "a1", "a2"]
-  ],
-  endObj: ["a3"],
-  background: "/image.jpg",
-  sound: "url"
-}
+import Combine from '../../components/create/combine'
+import { useStore } from '../../zustand/store'
+import ObjectList from '../../components/create/objectList'
 
 export default function Create() {
-  const [datas, setDatas] = useState(temp);
-  const [selectObj, setSelectObj] = useState<string>()
-  const [newObjModal, setNewObjModal] = useState<"start" | "combine" | undefined>()
+  const { selectObj, setSelectObj, contentData, setContentData } = useStore()
 
   const defaultImg = "/defaultBg.jpg"
   const [bgImgURL, setBgImgURL] = useState(defaultImg)
@@ -56,50 +16,6 @@ export default function Create() {
   const [bgURLInput, setBgURLInput] = useState("")
   const [bgImgType, setBgImgType] = useState<"file" | "url">("file")
 
-  const objImgProps = (data: string) => ({
-    id: data,
-    onClick: handleOnClick,
-    size: selectObj === data ? "65" : "55",
-    border: selectObj === data ? "2px solid white" : "",
-    img: findObjValueById(data, "img") ?? "",
-  })
-
-  const handleOnClick = (e: MouseEvent) => {
-    const target = e.target as HTMLElement
-    if (target.id !== selectObj) {
-      setSelectObj(target.id);
-      return;
-    }
-  }
-
-  const findObjValueById = (id: string | undefined, value: "img" | "id" | "name"): string | undefined => {
-    const data = datas.objects.find(value => id === value.id)
-    if (!data) return { id: undefined, name: "?", img: undefined }[value]
-    const dataInVal = data[value]
-    if (typeof dataInVal === "string") return dataInVal
-    return dataInVal.url
-  }
-
-  const handleCombine = (key: number, kind: 0 | 1 | 2) => {
-    if (!selectObj) return;
-    const newData: IPostData = JSON.parse(JSON.stringify(datas))
-    const combinate = newData.combinate[key]
-    let isSame = false
-    newData.combinate[key][kind] = selectObj
-    if ((combinate[0] === combinate[2] || combinate[1] === combinate[2]) && (combinate[2] !== "")) {
-      return alert("재료 오브젝트를 결과 오브젝트로 설정 할 수 없습니다.");
-    }
-    newData.combinate.forEach((combine, combKey) => {
-      if (key === combKey) return;
-      const same1 = combine[0] === combinate[0] && combine[1] === combinate[1]
-      const same2 = combine[0] === combinate[1] && combine[1] === combinate[0]
-      const same3 = combine[1] === combinate[0] && combine[0] === combinate[1]
-      if (same1 || same2 || same3) isSame = true;
-    })
-    if (isSame) return alert("다른 조합과 식이 동일거나 위치만 다릅니다.");
-    setDatas(newData)
-    setSelectObj(undefined)
-  }
   const handleChangeUrl = async (url: string) => {
     const result = await checkImageURL(url)
     if (result) {
@@ -129,16 +45,6 @@ export default function Create() {
       const { id } = (e.target as HTMLElement);
       if (selectObj && !id) setSelectObj(undefined);
     }}>
-      {
-        newObjModal ?
-          <CreateObjModal
-            datas={datas}
-            setDatas={setDatas}
-            modalType={newObjModal}
-            setModal={setNewObjModal}
-          />
-          : null
-      }
       <Header>
         <Link href="/"><SVG_Home /></Link>
         <h1>새 라보토리 생성</h1>
@@ -150,8 +56,8 @@ export default function Create() {
           <MainInputWrap>
             <MainInput>
               <h2>제목</h2>
-              <input type="text" value={datas.title} onChange={(e) => {
-                setDatas({ ...datas, title: e.target.value })
+              <input type="text" value={contentData.title} onChange={(e) => {
+                setContentData({ ...contentData, title: e.target.value })
               }} />
             </MainInput>
             <MainInput>
@@ -189,80 +95,9 @@ export default function Create() {
           </MainInputWrap>
         </Contents>
         <ObjectContent>
-          <TitleWrap>
-            <h1>시작 오브젝트</h1>
-            <button onClick={() => setNewObjModal("start")}>
-              <SVG_plus width="24" height="24" fill="#F1F6F9" />
-            </button>
-          </TitleWrap>
-          <ObjectList>
-            {
-              datas.start.map((data, key) => (
-                <Object key={key}>
-                  <ObjectImg {...objImgProps(data)} />
-                  <h1 contentEditable={"true"} suppressContentEditableWarning={true} onChange={() => { console.log("s") }}>{findObjValueById(data, "name")}</h1>
-                </Object>
-              ))
-            }
-          </ObjectList>
-          <TitleWrap>
-            <h1>조합 오브젝트</h1>
-            <button onClick={() => setNewObjModal("combine")}>
-              <SVG_plus width="24" height="24" fill="#F1F6F9" />
-            </button>
-          </TitleWrap>
-          <ObjectList>
-            {
-              datas.combine.map((data, key) => (
-                <Object key={key}>
-                  <ObjectImg {...objImgProps(data)} />
-                  <h1>{findObjValueById(data, "name")}</h1>
-                </Object>
-              ))
-            }
-          </ObjectList>
-          <TitleWrap>
-            <h1>조합</h1>
-            <button onClick={() => {
-              const newData = { ...datas }
-              newData.combinate.unshift(["", "", ""])
-              setDatas(newData)
-            }}>
-              <SVG_plus width="24" height="24" fill="#F1F6F9" />
-            </button>
-          </TitleWrap>
-          {
-            datas.combinate.map((data, key) => (
-              <CombineObj key={key}>
-                <Object>
-                  <ObjectImg
-                    onClick={() => { handleCombine(key, 0) }}
-                    size="60"
-                    style={{ backgroundImage: `url(${findObjValueById(data[0], "img")})` }}
-                  />
-                  <h1>{findObjValueById(data[0], "name")}</h1>
-                </Object>
-                <SVG_plus width="32" height="32" />
-                <Object>
-                  <ObjectImg
-                    onClick={() => { handleCombine(key, 1) }}
-                    size="60"
-                    style={{ backgroundImage: `url(${findObjValueById(data[1], "img")})` }}
-                  />
-                  <h1>{findObjValueById(data[1], "name")}</h1>
-                </Object>
-                <SVG_arrow_right width="32" height="32" />
-                <Object>
-                  <ObjectImg
-                    onClick={() => { handleCombine(key, 2) }}
-                    size="60"
-                    style={{ backgroundImage: `url(${findObjValueById(data[2], "img")})` }}
-                  />
-                  <h1>{findObjValueById(data[2], "name")}</h1>
-                </Object>
-              </CombineObj>
-            ))
-          }
+          <ObjectList title="시작 오브젝트" modalType='start' />
+          <ObjectList title="조합 오브젝트" modalType='combine' />
+          <Combine />
         </ObjectContent>
         <Ad></Ad>
       </Main>
@@ -349,10 +184,6 @@ const Preview = styled.div<{ img: string }>`
   background-repeat: repeat-x;
   background-size: cover;
 `
-const ObjectList = styled.div`
-  display:flex;
-  flex-wrap: wrap;
-`
 const Object = styled.div`
   display:flex;
   flex-direction: column;
@@ -395,37 +226,7 @@ const ObjectImg = styled.div<{ size: string, img: string, shadow: string, border
     height:50px;
   }
 `
-const CombineObj = styled.div`
-  display:flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #4b4e56;
-  padding: 16px 48px;
-  margin: 20px -24px;
-  margin-bottom: -12px;
-`
-const TitleWrap = styled.div`
-  display:flex;
-  align-items: center;
-  margin-top: 36px;
-  margin-bottom: 8px;
-  h1{
-    font-size: 18px;
-    margin-right: 8px;
-  }
-  button{
-    border: none;
-    display:flex;
-    cursor: pointer;
-    border-radius: 24px;
-    padding: 4px;
-    opacity: 0.8;
-    &:hover{
-      opacity: 1;
-      background-color: #444444;
-    }
-  }
-`
+
 const MainInput = styled.div`
   display:flex;
   flex-direction: column;
