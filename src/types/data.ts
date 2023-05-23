@@ -11,3 +11,8 @@ export interface IPostData {
   background: string,
   sound: string
 }
+
+export interface IImgData {
+  url: string, 
+  form?: FormData
+}

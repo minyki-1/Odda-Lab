@@ -6,40 +6,22 @@ import Link from "next/link"
 import Combine from '../../components/create/combine'
 import { useStore } from '../../zustand/store'
 import ObjectList from '../../components/create/objectList'
+import { IImgData } from '../../types/data'
+import OptionalInput from '../../components/create/optionalInput'
 
 export default function Create() {
   const { selectObj, setSelectObj, contentData, setContentData } = useStore()
 
   const defaultImg = "/defaultBg.jpg"
-  const [bgImgURL, setBgImgURL] = useState(defaultImg)
-  const [bgImgData, setBgImgData] = useState<FormData | string>(defaultImg)
+  const [bgImgData, setBgImgData] = useState<IImgData>({ url: defaultImg })
   const [bgURLInput, setBgURLInput] = useState("")
   const [bgImgType, setBgImgType] = useState<"file" | "url">("file")
 
-  const handleChangeUrl = async (url: string) => {
-    const result = await checkImageURL(url)
-    if (result) {
-      setBgImgURL(url);
-      setBgImgData(url);
-    } else {
-      setBgURLInput("");
-      setBgImgURL(defaultImg);
-      setBgImgData(defaultImg);
-    };
-  };
-  const handleFileChange = async (e: ChangeEvent) => {
-    const input = e.target as HTMLInputElement
-    const files = input.files;
-    if (!files) return;
-    const resizedImg = await resizeImage(files[0], 2400, 1500)
-    const url = URL.createObjectURL(resizedImg)
-    setBgImgURL(url)
-    const newFormData = new FormData();
-    newFormData.append('file', resizedImg);
-    setBgImgData(newFormData)
-    setBgURLInput(url);
+  const imageChange = async (file: File) => {
+    const changedImg = await resizeImage(file, 2400, 1500)
+    const url = URL.createObjectURL(changedImg)
+    return { changedImg, url }
   }
-
   return (
     <Container onClick={(e: MouseEvent) => {
       const { id } = (e.target as HTMLElement);
@@ -52,7 +34,7 @@ export default function Create() {
       <Main>
         <Contents>
           <Title>화면</Title>
-          <Preview img={bgImgURL} />
+          <Preview img={bgImgData.url} />
           <MainInputWrap>
             <MainInput>
               <h2>제목</h2>
@@ -61,34 +43,12 @@ export default function Create() {
               }} />
             </MainInput>
             <MainInput>
-              <div>
-                <h2>배경 이미지</h2>
-                <NewImgOption>
-                  <label htmlFor="optionFile">FILE</label>
-                  <input checked={bgImgType === "file"} onChange={() => setBgImgType("file")} id={"optionFile"} type="radio" />
-                  <label htmlFor="optionURL">URL</label>
-                  <input checked={bgImgType === "url"} onChange={() => setBgImgType("url")} id={"optionURL"} type="radio" />
-                </NewImgOption>
-              </div>
-              {
-                bgImgType === "file" ?
-                  <MainInputLabel htmlFor="modalInput">
-                    <h1>{bgImgURL}</h1>
-                  </MainInputLabel>
-                  : <input
-                    type="text"
-                    value={bgURLInput}
-                    onChange={(e) => setBgURLInput(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" ? handleChangeUrl((e.target as HTMLInputElement).value) : null}
-                    onBlur={(e) => { handleChangeUrl(e.target.value) }}
-                  />
-              }
-              <input
-                type="file"
-                id="modalInput"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
+              <OptionalInput
+                title={"배경 이미지"}
+                defaultImg={defaultImg}
+                imageChange={imageChange}
+                setData={setBgImgData}
+                styles={{ backgroundColor: "#545c6b", marginTop: "10px", padding: "14px 16px" }}
               />
             </MainInput>
             {/* TODO: 오디오 파일 받기 */}
@@ -210,32 +170,14 @@ const MainInput = styled.div`
 `
 const MainInputLabel = styled.label`
   border:none;
-  background-color: #545c6b;
   border-radius: 4px;
   flex:1;
+  background-color: #545c6b;
   margin-top: 10px;
   padding: 14px 16px;
-  &::-webkit-scrollbar {
-    display: none;
-  }
   h1{
     color:#F1F6F9;
     font-size: 18px;
-    height:18px;
-    overflow: hidden;
-  }
-`
-const NewImgOption = styled.div`
-  display:flex;
-  align-items: center;
-  input{
-    margin:0px;
-  }
-  label{
-    margin-left: 12px;
-    padding-right: 2px;
-    font-size: 12px;
-    color:#F1F6F9;
   }
 `
 const MainInputWrap = styled.div`

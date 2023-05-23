@@ -1,4 +1,3 @@
-import { IPostData } from "../types/data";
 import { TDndEvent } from "../types/dnd";
 import { useStore } from "../zustand/store";
 const objSize = 70

@@ -5,43 +5,32 @@ import { checkImageURL, cropImage } from '../../lib/image'
 import { getCompUID } from '../../lib/randomString'
 import NextImage from 'next/image'
 import { useStore } from '../../zustand/store'
+import { IImgData } from '../../types/data'
+import OptionalInput from './optionalInput'
 
 export default function CreateObjModal({ modalType, setModal }: { modalType: "start" | "combine" | undefined, setModal: Dispatch<SetStateAction<"start" | "combine" | undefined>> }) {
   const defaultImg = "/defaultObj.png"
-  const [newObjImgUrl, setNewObjImgUrl] = useState(defaultImg)
-  const [newObjImg, setNewObjImg] = useState<FormData | string>(defaultImg)
-  const [urlInputTxt, setUrlInputTxt] = useState("")
+  const [newObjImg, setNewObjImg] = useState<IImgData>({ url: defaultImg })
   const [newObjName, setNewObjName] = useState("")
-  const [imgType, setImgType] = useState<"file" | "url">("file")
   const { contentData, setContentData } = useStore()
 
-  const handleFileChange = async (e: ChangeEvent) => {
-    const input = e.target as HTMLInputElement
-    const files = input.files;
-    if (!files) return;
-    const croppedImg = await cropImage(files[0], 360)
-    const url = URL.createObjectURL(croppedImg)
-    setNewObjImgUrl(url)
-    const newFormData = new FormData();
-    newFormData.append('file', croppedImg);
-    setNewObjImg(newFormData)
-    setUrlInputTxt(url)
+  const imageChange = async (file: File) => {
+    const changedImg = await cropImage(file, 360)
+    const url = URL.createObjectURL(changedImg)
+    return { changedImg, url }
   }
   const handleCreateObject = () => {
     if (!newObjImg || !contentData) return;
     const newData = { ...contentData }
     const id = getCompUID(8, document)
     const name = newObjName ? newObjName : "오브젝트"
-    let img: string | { id: string, url: string } | null = typeof newObjImg === "string" ? newObjImg : null
-    if (typeof newObjImg !== "string") {
-      const file = newObjImg.get('file') as File | null
-      if (file) {
-        const url = URL.createObjectURL(file)
-        img = {
-          id: String(newData.imageFile.length),
-          url
-        }
-        newData.imageFile.push(newObjImg)
+    let img: string | { id: string, url: string } | null = newObjImg.url
+    if (newObjImg.form) {
+      const formData = newObjImg.form
+      const file = formData?.get('file') as File | null
+      if (file && formData) {
+        img = { url: newObjImg.url, id: String(newData.imageFile.length) }
+        newData.imageFile.push(formData)
       }
     }
 
@@ -51,20 +40,8 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
     setContentData(newData)
 
     setModal(undefined)
-    setNewObjImgUrl(defaultImg)
-    setNewObjImg(defaultImg)
+    setNewObjImg({ url: defaultImg })
   }
-  const handleChangeUrl = async (url: string) => {
-    const result = await checkImageURL(url)
-    if (result) {
-      setNewObjImgUrl(url);
-      setNewObjImg(url);
-    } else {
-      setUrlInputTxt("");
-      setNewObjImgUrl(defaultImg);
-      setNewObjImg(defaultImg);
-    };
-  };
 
   return (
     <NewObjModalBg>
@@ -74,7 +51,7 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
         </NewObjModalHeader>
         <NewObjContents>
           <NewObjImg htmlFor="newModalInput">
-            <NextImage src={newObjImgUrl} alt="object" width={170} height={170} />
+            <NextImage src={newObjImg.url} alt="object" width={170} height={170} />
             <div>
               <SVG_pencil fill="white" width="60" height="60" />
             </div>
@@ -90,36 +67,14 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
               />
             </NewObjInput>
             <NewObjInput>
-              <div>
-                <h2>이미지</h2>
-                <NewImgOption>
-                  <label htmlFor="newOptionFile">FILE</label>
-                  <input checked={imgType === "file"} onChange={() => setImgType("file")} id={"newOptionFile"} type="radio" />
-                  <label htmlFor="newOptionURL">URL</label>
-                  <input checked={imgType === "url"} onChange={() => setImgType("url")} id={"newOptionURL"} type="radio" />
-                </NewImgOption>
-              </div>
-              {
-                imgType === "file" ?
-                  <NewObjInputLabel htmlFor="newModalInput">
-                    <h2>{newObjImgUrl}</h2>
-                  </NewObjInputLabel>
-                  : <input
-                    type="text"
-                    value={urlInputTxt}
-                    onChange={(e) => setUrlInputTxt(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" ? handleChangeUrl((e.target as HTMLInputElement).value) : null}
-                    onBlur={(e) => { handleChangeUrl(e.target.value) }}
-                  />
-              }
+              <OptionalInput
+                title={"이미지"}
+                defaultImg={defaultImg}
+                imageChange={imageChange}
+                setData={setNewObjImg}
+                styles={{ backgroundColor: "#343943", marginTop: "6px", padding: "12px 16px" }}
+              />
             </NewObjInput>
-            <input
-              type="file"
-              id="newModalInput"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-            />
             <NewObjBtnWrap>
               <button style={{ backgroundColor: "#6084E0" }} onClick={handleCreateObject}>생성</button>
               <button style={{ backgroundColor: "#E04F4F" }} onClick={() => { setModal(undefined) }}>취소</button>
@@ -227,31 +182,16 @@ const NewObjInput = styled.div`
 `
 const NewObjInputLabel = styled.label`
   border:none;
-  background-color: #343943;
   border-radius: 4px;
   flex:1;
+  background-color: #343943;
   margin-top: 6px;
   padding: 12px 16px;
-  width:calc(316px - 32px);
   h2{
     margin: 0px;
     white-space: nowrap;
     overflow: hidden;
     font-size: 18px;
-    color:#F1F6F9;
-  }
-`
-const NewImgOption = styled.div`
-  display:flex;
-  align-items: center;
-  input{
-    margin:0px;
-    color:#F1F6F9;
-  }
-  label{
-    margin-left: 12px;
-    padding-right: 2px;
-    font-size: 12px;
     color:#F1F6F9;
   }
 `
