@@ -14,14 +14,7 @@ export default function Create() {
 
   const defaultImg = "/defaultBg.jpg"
   const [bgImgData, setBgImgData] = useState<IImgData>({ url: defaultImg })
-  const [bgURLInput, setBgURLInput] = useState("")
-  const [bgImgType, setBgImgType] = useState<"file" | "url">("file")
 
-  const imageChange = async (file: File) => {
-    const changedImg = await resizeImage(file, 2400, 1500)
-    const url = URL.createObjectURL(changedImg)
-    return { changedImg, url }
-  }
   return (
     <Container onClick={(e: MouseEvent) => {
       const { id } = (e.target as HTMLElement);
@@ -46,7 +39,7 @@ export default function Create() {
               <OptionalInput
                 title={"배경 이미지"}
                 defaultImg={defaultImg}
-                imageChange={imageChange}
+                getImage={(file: File) => resizeImage(file, 2400, 1500)}
                 setData={setBgImgData}
                 styles={{ backgroundColor: "#545c6b", marginTop: "10px", padding: "14px 16px" }}
               />
@@ -165,18 +158,6 @@ const MainInput = styled.div`
     flex:1;
     margin-top: 10px;
     padding: 12px 16px;
-    font-size: 18px;
-  }
-`
-const MainInputLabel = styled.label`
-  border:none;
-  border-radius: 4px;
-  flex:1;
-  background-color: #545c6b;
-  margin-top: 10px;
-  padding: 14px 16px;
-  h1{
-    color:#F1F6F9;
     font-size: 18px;
   }
 `

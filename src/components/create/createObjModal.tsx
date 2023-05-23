@@ -14,11 +14,6 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
   const [newObjName, setNewObjName] = useState("")
   const { contentData, setContentData } = useStore()
 
-  const imageChange = async (file: File) => {
-    const changedImg = await cropImage(file, 360)
-    const url = URL.createObjectURL(changedImg)
-    return { changedImg, url }
-  }
   const handleCreateObject = () => {
     if (!newObjImg || !contentData) return;
     const newData = { ...contentData }
@@ -70,7 +65,7 @@ export default function CreateObjModal({ modalType, setModal }: { modalType: "st
               <OptionalInput
                 title={"이미지"}
                 defaultImg={defaultImg}
-                imageChange={imageChange}
+                getImage={(file: File) => cropImage(file, 360)}
                 setData={setNewObjImg}
                 styles={{ backgroundColor: "#343943", marginTop: "6px", padding: "12px 16px" }}
               />

@@ -7,15 +7,12 @@ import { IImgData } from "../../types/data";
 interface IDataInputProps {
   title: string,
   defaultImg: string,
-  imageChange: (file: File) => Promise<{
-    changedImg: Blob;
-    url: string;
-  }>,
+  getImage: (file: File) => Promise<Blob>,
   setData: Dispatch<SetStateAction<IImgData>>,
   styles: Object
 }
 
-export default function OptionalInput({ title, defaultImg, imageChange, setData, styles }: IDataInputProps) {
+export default function OptionalInput({ title, defaultImg, getImage, setData, styles }: IDataInputProps) {
   const [imgType, setImgType] = useState<"file" | "url">("file")
   const [URLInput, setURLInput] = useState("")
   const [imgURL, setImgURL] = useState(defaultImg)
@@ -35,7 +32,8 @@ export default function OptionalInput({ title, defaultImg, imageChange, setData,
     const input = e.target as HTMLInputElement
     const files = input.files;
     if (!files) return;
-    const { changedImg, url } = await imageChange(files[0])
+    const changedImg = await getImage(files[0])
+    const url = URL.createObjectURL(changedImg)
     setImgURL(url)
     const newFormData = new FormData();
     newFormData.append('file', changedImg);
@@ -78,28 +76,6 @@ export default function OptionalInput({ title, defaultImg, imageChange, setData,
   )
 }
 
-const MainInput = styled.div`
-  display:flex;
-  flex-direction: column;
-  padding: 0px;
-  padding-bottom: 10px;
-  flex:1;
-  overflow: hidden;
-  h2{
-    color:#F1F6F9;
-    font-size: 14px;
-    margin-right: 8px;
-  }
-  input{
-    color:#F1F6F9;
-    border:none;
-    background-color: #545c6b;
-    border-radius: 4px;
-    flex:1;
-    padding: 12px 16px;
-    font-size: 18px;
-  }
-`
 const OptionWrap = styled.div`
   display:flex;
   justify-content: space-between;
@@ -116,7 +92,8 @@ const MainInputLabel = styled.label`
   h1{
     color:#F1F6F9;
     font-size: 18px;
-    /* height:18px; */
+    height:18px;
+    word-break: break-all;
     overflow: hidden;
   }
 `
