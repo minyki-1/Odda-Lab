@@ -1,6 +1,6 @@
 import styled from 'styled-components'
-import { ChangeEvent, useState } from 'react'
-import { resizeImage, checkImageURL } from '../../lib/image'
+import { useState } from 'react'
+import { resizeImage } from '../../lib/image'
 import SVG_Home from "../../svg/home.svg"
 import Link from "next/link"
 import Combine from '../../components/create/combine'

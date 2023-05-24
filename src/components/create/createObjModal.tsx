@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import SVG_pencil from "../../svg/pencil.svg"
-import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
-import { checkImageURL, cropImage } from '../../lib/image'
+import { useState, Dispatch, SetStateAction } from 'react'
+import { cropImage } from '../../lib/image'
 import { getCompUID } from '../../lib/randomString'
 import NextImage from 'next/image'
 import { useStore } from '../../zustand/store'

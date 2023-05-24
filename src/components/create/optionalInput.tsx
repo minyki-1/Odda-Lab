@@ -1,7 +1,6 @@
 import styled from "styled-components"
 import { ChangeEvent, Dispatch, SetStateAction, useState } from "react"
-import { checkImageURL, resizeImage } from "../../lib/image";
-import { useStore } from "../../zustand/store";
+import { checkImageURL } from "../../lib/image";
 import { IImgData } from "../../types/data";
 
 interface IDataInputProps {
