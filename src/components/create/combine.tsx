@@ -11,7 +11,7 @@ export default function Combine() {
 
   const handleCombine = (key: number, kind: 0 | 1 | 2) => {
     if (!selectObj) return;
-    const newData: IPostData = JSON.parse(JSON.stringify(contentData))
+    const newData: IPostData = structuredClone(contentData)
     const combinate = newData.combinate[key]
     let isSame = false
     newData.combinate[key][kind] = selectObj

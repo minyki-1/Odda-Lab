@@ -22,7 +22,7 @@ export default function Create() {
     }}>
       <Header>
         <Link href="/"><SVG_Home /></Link>
-        <h1>새 라보토리 생성</h1>
+        <h1>새 실험실 생성</h1>
       </Header>
       <Main>
         <Contents>
