@@ -2,6 +2,8 @@ import styled from 'styled-components'
 import SVG_search from "../svg/search.svg"
 import Link from "next/link"
 import SVG_heart_fill from "../svg/heart-fill.svg"
+import NextImage from 'next/image'
+import { useEffect } from 'react'
 const tempObjURL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506"
 const tempData = [
   { id: "0", title: "테스트 실험실1", backgroundImage: "/image.jpg", object: [tempObjURL, tempObjURL, tempObjURL] },
@@ -27,11 +29,22 @@ export default function Home() {
         {
           tempData.map((data, key) => (
             <Rabotory href={`/play/${data.id}`} key={key}>
-              <RabImg>
-                <div style={{ backgroundImage: `url(${data.object[0]})` }}></div>
-                <div style={{ backgroundImage: `url(${data.object[1]})` }}></div>
-                <div style={{ backgroundImage: `url(${data.object[2]})` }}></div>
-              </RabImg>
+              <RabPreview>
+                <NextImage
+                  fill={true}
+                  src={data.backgroundImage}
+                  alt={'BackgroundImage'}
+                />
+                <RabPreviewObj>
+                  {
+                    data.object.map((url, key) => (
+                      <div key={key}>
+                        <NextImage src={url} alt={"object"} fill={true} />
+                      </div>
+                    ))
+                  }
+                </RabPreviewObj>
+              </RabPreview>
               <RabTitle>{data.title}</RabTitle>
               <RabInfo>
                 <SVG_heart_fill width={16} height={16} />
@@ -45,6 +58,15 @@ export default function Home() {
       </RabotoryList>
     </Container>
   )
+}
+
+export async function getServerSideProps() {
+  const data = 'Hello, World!';
+  return {
+    props: {
+      data,
+    },
+  };
 }
 
 const Container = styled.div`
@@ -114,29 +136,42 @@ const Rabotory = styled(Link)`
   width:calc(33% - 50px);
   border-radius: 8px;
   box-shadow: 0px 0px 12px 6px rgba(0,0,0,0.2);
+  overflow: hidden;
 `
-const RabImg = styled.div`
+const RabPreview = styled.div`
   width:100%;
   aspect-ratio: 16 / 9;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url(/image.jpg);
-  background-position: center center;
-  background-repeat: repeat-x;
-  background-size: cover;
   display:flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  img{
+    object-fit: cover;
+  }
+`
+const RabPreviewObj = styled.div`
+  position: absolute;
+  display:flex;
+  align-items: center;
+  justify-content: center;
   div{
+    display:flex;
+    align-items: center;  
+    justify-content: center;
     width:70px;
     height:70px;
     border-radius: 100px;
-    background-position: center center;
-    background-repeat: repeat-x;
-    background-size: cover;
+    overflow: hidden;
     margin: 20px;
+    position: relative;
     @media screen and (max-width: 800px) {
       width:50px;
       height:50px;
+    }
+    img{
+      object-fit: cover;
     }
   }
 `

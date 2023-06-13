@@ -58,6 +58,16 @@ export default function Create() {
   )
 }
 
+export async function getServerSideProps() {
+  const data = 'Hello, World!';
+
+  return {
+    props: {
+      data,
+    },
+  };
+}
+
 const Container = styled.div`
   width:100vw;
   min-height:100vh;
