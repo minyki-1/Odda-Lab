@@ -26,6 +26,7 @@ export default function Home() {
         </Search>
       </SortWrapper>
       <RabotoryList>
+        <NextImage width={400} height={400} src="https://odda-lab.s3.ap-northeast-2.amazonaws.com/pngImg.png" alt={"test"} />
         {
           tempData.map((data, key) => (
             <Rabotory href={`/play/${data.id}`} key={key}>

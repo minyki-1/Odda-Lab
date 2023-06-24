@@ -45,6 +45,7 @@ const temp = {
 }
 
 const objSize = 70
+
 export default function Play() {
   const { setSelectObj } = useStore()
   const { handleDndDrop, handleMove } = useDndObj();
@@ -127,6 +128,7 @@ export default function Play() {
                 data.objects.filter(value => data.found.includes(value.id))
                   .map((value, key) => (
                     <Object key={key}>
+                      {/* // ! 이미지를 next/image로 변경하기 */}
                       <ObjectImg
                         id={value.id}
                         style={{ backgroundImage: `url("${value.img}")` }}

@@ -1,19 +1,23 @@
 import styled from 'styled-components'
-import { useState } from 'react'
-import { resizeImage } from '../../lib/image'
-import SVG_Home from "../../svg/home.svg"
+import { useEffect, useState } from 'react'
+import { resizeImage } from '../lib/image'
+import SVG_Home from "../svg/home.svg"
 import Link from "next/link"
-import Combine from '../../components/create/combine'
-import { useStore } from '../../zustand/store'
-import ObjectList from '../../components/create/objectList'
-import { IImgData } from '../../types/data'
-import OptionalInput from '../../components/create/optionalInput'
+import Combine from '../components/create/combine'
+import { useStore } from '../zustand/store'
+import ObjectList from '../components/create/objectList'
+import { IImgData } from '../types/data'
+import OptionalInput from '../components/create/optionalInput'
 
 export default function Create() {
   const { selectObj, setSelectObj, contentData, setContentData } = useStore()
 
   const defaultImg = "/defaultBg.jpg"
   const [bgImgData, setBgImgData] = useState<IImgData>({ url: defaultImg })
+
+  useEffect(() => {
+    console.log(contentData);
+  }, [contentData])
 
   return (
     <Container onClick={(e: MouseEvent) => {
@@ -23,10 +27,26 @@ export default function Create() {
       <Header>
         <Link href="/"><SVG_Home /></Link>
         <h1>새 실험실 생성</h1>
+        <button onClick={() => {
+          fetch("http://localhost:3000/lab", {
+            method: "POST",
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(contentData)
+          })
+            .then(response => {
+              console.log(response)
+            })
+            .catch(error => {
+              console.log(error)
+            });
+        }}>전송</button>
       </Header>
       <Main>
         <Contents>
           <Title>화면</Title>
+          {/* // ! 이미지를 next/image로 변경하기 */}
           <Preview img={bgImgData.url} />
           <MainInputWrap>
             <MainInput>
@@ -36,6 +56,7 @@ export default function Create() {
               }} />
             </MainInput>
             <MainInput>
+              {/* // ! 이미지를 next/image로 변경하기 */}
               <OptionalInput
                 title={"배경 이미지"}
                 defaultImg={defaultImg}
