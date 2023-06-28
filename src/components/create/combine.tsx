@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import SVG_plus from "../../svg/plus.svg"
 import SVG_arrow_right from "../../svg/arrow-right.svg"
 import { useStore } from '../../zustand/store'
-import { IPostData } from '../../types/data'
+import { ILab } from '../../types/data'
 import { useFindDataById } from '../../lib/dnd'
 
 export default function Combine() {
@@ -11,7 +11,7 @@ export default function Combine() {
 
   const handleCombine = (key: number, kind: 0 | 1 | 2) => {
     if (!selectObj) return;
-    const newData: IPostData = structuredClone(contentData)
+    const newData: ILab = structuredClone(contentData)
     const combinate = newData.combinate[key]
     let isSame = false
     newData.combinate[key][kind] = selectObj

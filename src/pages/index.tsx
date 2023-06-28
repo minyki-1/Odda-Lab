@@ -3,14 +3,32 @@ import SVG_search from "../svg/search.svg"
 import Link from "next/link"
 import SVG_heart_fill from "../svg/heart-fill.svg"
 import NextImage from 'next/image'
-import { useEffect } from 'react'
-const tempObjURL = "https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Ft1.daumcdn.net%2Fcfile%2Ftistory%2F244B0939537624F506"
-const tempData = [
-  { id: "0", title: "테스트 실험실1", backgroundImage: "/image.jpg", object: [tempObjURL, tempObjURL, tempObjURL] },
-  { id: "1", title: "테스트 실험실2", backgroundImage: "/image.jpg", object: [tempObjURL, tempObjURL, tempObjURL] }
-]
+import { useEffect, useState } from 'react'
 
-export default function Home() {
+interface IObj {
+  id: string,
+  img: string,
+  name: string
+}
+
+interface ILabList {
+  id: string,
+  title: string,
+  background_img: string,
+  start_obj: IObj[],
+  created_at: string,
+  like_count: number,
+  maker_name: string,
+  maker_img: string
+}
+
+export default function Home({ data }: { data: ILabList[] }) {
+  const [labList, setLabList] = useState(data)
+
+  useEffect(() => {
+    console.log(labList)
+  }, [labList])
+
   return (
     <Container>
       <Header></Header>
@@ -25,44 +43,45 @@ export default function Home() {
           <SVG_search fill="#F1F6F9" width={24} height={24} />
         </Search>
       </SortWrapper>
-      <RabotoryList>
-        <NextImage width={400} height={400} src="https://odda-lab.s3.ap-northeast-2.amazonaws.com/pngImg.png" alt={"test"} />
+      <LabList>
         {
-          tempData.map((data, key) => (
-            <Rabotory href={`/play/${data.id}`} key={key}>
-              <RabPreview>
-                <NextImage
-                  fill={true}
-                  src={data.backgroundImage}
-                  alt={'BackgroundImage'}
-                />
-                <RabPreviewObj>
-                  {
-                    data.object.map((url, key) => (
-                      <div key={key}>
-                        <NextImage src={url} alt={"object"} fill={true} />
-                      </div>
-                    ))
-                  }
-                </RabPreviewObj>
-              </RabPreview>
-              <RabTitle>{data.title}</RabTitle>
-              <RabInfo>
-                <SVG_heart_fill width={16} height={16} />
-                <h2>20</h2>
-                <SVG_heart_fill width={16} height={16} />
-                <h2>20</h2>
-              </RabInfo>
-            </Rabotory>
+          labList.map((data, key) => (
+            <Lab href={`/play/${data.id}`} key={key}>
+              <NextImage
+                fill={true}
+                src={data.background_img}
+                alt={'BackgroundImage'}
+              />
+              
+              <LabInfo>
+                <h1>{data.title}</h1>
+                <div>
+                  <SVG_heart_fill width={20} height={20} />
+                  <h2>{data.like_count}</h2>
+                  <NextImage width={24} height={24} src={data.maker_img} alt={data.maker_name} />
+                  <h2>{data.maker_name}</h2>
+                </div>
+              </LabInfo>
+              <PreviewObjList>
+                {
+                  data.start_obj.slice(0, 3).map((data, key) => (
+                    <PreviewObj key={key}>
+                      <NextImage src={data.img} alt={"object"} fill={true} />
+                    </PreviewObj>
+                  ))
+                }
+              </PreviewObjList>
+            </Lab>
           ))
         }
-      </RabotoryList>
+      </LabList>
     </Container>
   )
 }
 
 export async function getServerSideProps() {
-  const data = 'Hello, World!';
+  const response = await fetch('http://localhost:3000/lab/popular/1');
+  const data = await response.json();
   return {
     props: {
       data,
@@ -122,75 +141,73 @@ const Search = styled.div`
     cursor: pointer;
   }
 `
-const RabotoryList = styled.div`
+const LabList = styled.div`
   display:flex;
   flex-wrap: wrap;
   flex: 1;
 `
-const Rabotory = styled(Link)`
+const Lab = styled(Link)`
   display:flex;
+  justify-content: space-between;
   flex-direction: column;
-  margin-left: 40px;
+  margin-left: 30px;
   margin-top: 20px;
   margin-bottom: 20px;
   background-color: #252B30;
-  width:calc(33% - 50px);
+  width:calc(50% - 45px);
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
   border-radius: 8px;
   box-shadow: 0px 0px 12px 6px rgba(0,0,0,0.2);
-  overflow: hidden;
+  position: relative;
 `
-const RabPreview = styled.div`
-  width:100%;
-  aspect-ratio: 16 / 9;
+const PreviewObjList = styled.div`
   display:flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  width:100%;
+  height:100%;
+  position: absolute;
+`
+const PreviewObj = styled.div`
+  display:flex;
+  align-items: center;  
+  justify-content: center;
+  width:12%;
+  aspect-ratio: 1 / 1;
+  border-radius: 100px;
   overflow: hidden;
+  margin: 20px;
   position: relative;
+  @media screen and (max-width: 800px) {
+    width:50px;
+    height:50px;
+  }
   img{
     object-fit: cover;
   }
 `
-const RabPreviewObj = styled.div`
-  position: absolute;
+const LabInfo = styled.div`
+  padding: 22px;
   display:flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  z-index: 1;
   div{
     display:flex;
-    align-items: center;  
-    justify-content: center;
-    width:70px;
-    height:70px;
-    border-radius: 100px;
-    overflow: hidden;
-    margin: 20px;
-    position: relative;
-    @media screen and (max-width: 800px) {
-      width:50px;
-      height:50px;
-    }
-    img{
-      object-fit: cover;
-    }
+    align-items: center;
   }
-`
-const RabTitle = styled.h1`
-  padding: 16px;
-  font-size: 20px;
-`
-const RabInfo = styled.div`
-  padding: 18px;
-  padding-top: 0px;
-  display:flex;
-  align-items: center;
-  h2{
-    font-size: 17px;
-    margin-left: 4px;
+  h1{
+    font-size: 18px;
     margin-right: 20px;
   }
-  svg{
-    padding:4px;
+  h2{
+    font-size: 16px;
+    margin-left: 8px;
+    margin-right: 18px;
+  }
+  img{
+    margin-left: 6px;
+    border-radius: 100px;
   }
 `

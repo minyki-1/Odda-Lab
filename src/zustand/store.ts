@@ -1,14 +1,14 @@
 import { create } from "zustand";
-import { IPostData } from "../types/data"
+import { ILab } from "../types/data"
 
 interface IselectCompState {
   selectObj: string | undefined;
   setSelectObj: (select: string | undefined) => void;
-  contentData: IPostData;
-  setContentData: (select: IPostData) => void;
+  contentData: ILab;
+  setContentData: (select: ILab) => void;
 }
 
-const temp: IPostData = {
+const temp: ILab = {
   id: "0",
   title: "이상한 실험실",
   makerId: "0",

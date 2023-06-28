@@ -1,4 +1,4 @@
-export interface IPostData {
+export interface ILab {
   id: string,
   title: string,
   makerId: string,
@@ -11,7 +11,7 @@ export interface IPostData {
   background: string,
   sound: string
 }
-
+  
 export interface IImgData {
   url: string, 
   form?: FormData
